@@ -17,7 +17,6 @@ const userSchema = new mongoose.Schema(
     permissions: {
       addMember: { type: Boolean, default: DEFAULT_TRAINER_PERMISSIONS.addMember },
       renewMembership: { type: Boolean, default: DEFAULT_TRAINER_PERMISSIONS.renewMembership },
-      markAttendance: { type: Boolean, default: DEFAULT_TRAINER_PERMISSIONS.markAttendance },
       viewAssignedMembers: { type: Boolean, default: DEFAULT_TRAINER_PERMISSIONS.viewAssignedMembers },
       collectFees: { type: Boolean, default: DEFAULT_TRAINER_PERMISSIONS.collectFees },
     },

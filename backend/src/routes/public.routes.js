@@ -2,14 +2,12 @@ import { Router } from 'express';
 import {
   submitRegistration, getPublicGym,
 } from '../controllers/registration.controller.js';
-import { publicCheckIn } from '../controllers/attendance.controller.js';
 import { getPublicInvoice, downloadPublicInvoicePDF } from '../controllers/payment.controller.js';
 
 const router = Router();
 
 router.get('/gyms/:gymSlug', getPublicGym);
 router.post('/register/:gymSlug', submitRegistration);
-router.post('/checkin/:gymSlug', publicCheckIn);
 router.get('/invoices/:token', getPublicInvoice);
 router.get('/invoices/:token/pdf', downloadPublicInvoicePDF);
 

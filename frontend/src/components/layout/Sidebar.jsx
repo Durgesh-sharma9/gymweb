@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Users, UserCog, CreditCard, CalendarCheck,
+  LayoutDashboard, Users, UserCog, CreditCard,
   Receipt, Settings, LogOut, Dumbbell, Megaphone, ClipboardList,
   UserPlus, Bell, Wallet,
 } from 'lucide-react';
@@ -12,7 +12,6 @@ const ownerLinks = [
   { to: '/gym/trainers', icon: UserCog, label: 'Trainers' },
   { to: '/gym/plans', icon: CreditCard, label: 'Plans' },
   { to: '/gym/payments', icon: Wallet, label: 'Payments' },
-  { to: '/gym/attendance', icon: CalendarCheck, label: 'Attendance' },
   { to: '/gym/expenses', icon: Receipt, label: 'Expenses' },
   { to: '/gym/registrations', icon: UserPlus, label: 'Registrations' },
   { to: '/gym/announcements', icon: Megaphone, label: 'Announcements' },
@@ -23,7 +22,6 @@ const ownerLinks = [
 const trainerLinks = [
   { to: '/trainer/dashboard', icon: LayoutDashboard, label: 'Dashboard', perm: null },
   { to: '/trainer/members', icon: Users, label: 'My Members', perm: 'viewAssignedMembers' },
-  { to: '/trainer/attendance', icon: CalendarCheck, label: 'Attendance', perm: 'markAttendance' },
   { to: '/trainer/collect-fee', icon: Wallet, label: 'Collect Fee', perm: 'collectFees' },
   { to: '/trainer/add-member', icon: UserPlus, label: 'Add Member', perm: 'addMember' },
   { to: '/trainer/registrations', icon: Bell, label: 'Registrations', perm: 'addMember' },
@@ -31,9 +29,12 @@ const trainerLinks = [
 
 const superAdminLinks = [
   { to: '/super-admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/super-admin/gym-owners', icon: Users, label: 'Gym Owners' },
   { to: '/super-admin/gyms', icon: Dumbbell, label: 'Gyms' },
-  { to: '/super-admin/plans', icon: CreditCard, label: 'SaaS Plans' },
+  { to: '/super-admin/plans', icon: CreditCard, label: 'Plans' },
+  { to: '/super-admin/subscription-requests', icon: Bell, label: 'Subscription Requests' },
+  { to: '/super-admin/revenue', icon: Wallet, label: 'Revenue' },
+  { to: '/super-admin/templates', icon: Receipt, label: 'Templates' },
+  { to: '/super-admin/settings', icon: Settings, label: 'Settings' },
 ];
 
 export default function Sidebar() {

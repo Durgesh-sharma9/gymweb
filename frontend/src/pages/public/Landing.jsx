@@ -62,11 +62,11 @@ export default function Landing() {
             <FeatureCard icon={<Users size={32} />} title="Member Management" description="Track member details, memberships, and renewal dates in one place" />
             <FeatureCard icon={<Users size={32} />} title="Trainer Management" description="Manage trainer profiles, assignments, and performance tracking" />
             <FeatureCard icon={<QrCode size={32} />} title="QR Registration" description="Quick member registration using QR codes for seamless onboarding" />
-            <FeatureCard icon={<CheckCircle size={32} />} title="Attendance Tracking" description="Easy check-in/check-out system with detailed attendance reports" />
             <FeatureCard icon={<TrendingUp size={32} />} title="Revenue Dashboard" description="Real-time insights into your gym's financial performance" />
             <FeatureCard icon={<Receipt size={32} />} title="GST Billing" description="Generate GST-compliant invoices with automatic tax calculations" />
             <FeatureCard icon={<MessageSquare size={32} />} title="WhatsApp Receipts" description="Send payment receipts directly to members via WhatsApp" />
             <FeatureCard icon={<Zap size={32} />} title="Custom Plans" description="Create flexible membership plans to suit your gym's needs" />
+            <FeatureCard icon={<Shield size={32} />} title="Secure Data" description="Your gym data is encrypted and securely stored" />
           </div>
         </div>
       </section>

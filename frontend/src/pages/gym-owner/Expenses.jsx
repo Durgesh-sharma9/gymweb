@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
-import { LoadingSpinner, Modal } from '../../components/ui';
+import { LoadingSpinner, Modal, EmptyState } from '../../components/ui';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
@@ -14,7 +14,17 @@ export default function Expenses() {
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ category: 'rent', title: '', amount: '', expenseDate: new Date().toISOString().split('T')[0], notes: '' });
 
-  const load = () => api.get('/expenses').then((res) => setExpenses(res.data.expenses)).finally(() => setLoading(false));
+  const load = () => {
+    setLoading(true);
+    api.get('/expenses')
+      .then((res) => setExpenses(Array.isArray(res.data?.expenses) ? res.data.expenses : []))
+      .catch((err) => {
+        console.error('Failed to load expenses:', err);
+        toast.error('Failed to load expenses');
+        setExpenses([]);
+      })
+      .finally(() => setLoading(false));
+  };
   useEffect(load, []);
 
   const handleSubmit = async (e) => {
@@ -38,28 +48,32 @@ export default function Expenses() {
         <button onClick={() => setModal(true)} className="btn-primary"><Plus size={18} /> Add Expense</button>
       </div>
 
-      <div className="card overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="text-left p-3">Date</th>
-              <th className="text-left p-3">Title</th>
-              <th className="text-left p-3">Category</th>
-              <th className="text-left p-3">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {expenses.map((e) => (
-              <tr key={e._id} className="border-b hover:bg-gray-50">
-                <td className="p-3">{formatDate(e.expenseDate)}</td>
-                <td className="p-3">{e.title}</td>
-                <td className="p-3 capitalize">{e.category.replace('_', ' ')}</td>
-                <td className="p-3">{formatCurrency(e.amount)}</td>
+      {expenses.length === 0 ? (
+        <EmptyState title="No expenses found" description="Track your gym expenses by adding your first expense" action={<button onClick={() => setModal(true)} className="btn-primary">Add Expense</button>} />
+      ) : (
+        <div className="card overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="text-left p-3">Date</th>
+                <th className="text-left p-3">Title</th>
+                <th className="text-left p-3">Category</th>
+                <th className="text-left p-3">Amount</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {expenses.map((e) => (
+                <tr key={e._id} className="border-b hover:bg-gray-50">
+                  <td className="p-3">{formatDate(e.expenseDate)}</td>
+                  <td className="p-3">{e.title}</td>
+                  <td className="p-3 capitalize">{e.category.replace('_', ' ')}</td>
+                  <td className="p-3">{formatCurrency(e.amount)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <Modal open={modal} onClose={() => setModal(false)} title="Add Expense">
         <form onSubmit={handleSubmit} className="space-y-4">

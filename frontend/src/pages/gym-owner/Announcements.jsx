@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
-import { LoadingSpinner, Modal } from '../../components/ui';
+import { LoadingSpinner, Modal, EmptyState } from '../../components/ui';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { formatDate } from '../../utils/helpers';
 
@@ -12,7 +12,17 @@ export default function Announcements() {
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ title: '', message: '', targetAudience: 'all' });
 
-  const load = () => api.get('/announcements').then((res) => setItems(res.data)).finally(() => setLoading(false));
+  const load = () => {
+    setLoading(true);
+    api.get('/announcements')
+      .then((res) => setItems(Array.isArray(res.data) ? res.data : []))
+      .catch((err) => {
+        console.error('Failed to load announcements:', err);
+        toast.error('Failed to load announcements');
+        setItems([]);
+      })
+      .finally(() => setLoading(false));
+  };
   useEffect(load, []);
 
   const handleSubmit = async (e) => {
@@ -36,17 +46,21 @@ export default function Announcements() {
         <button onClick={() => setModal(true)} className="btn-primary"><Plus size={18} /> New Announcement</button>
       </div>
 
-      <div className="space-y-4">
-        {items.map((a) => (
-          <div key={a._id} className="card p-5">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">{a.title}</h3>
-              <span className="text-xs text-gray-500 capitalize">{a.targetAudience} · {formatDate(a.sentAt)}</span>
+      {items.length === 0 ? (
+        <EmptyState title="No announcements found" description="Send announcements to keep your members informed" action={<button onClick={() => setModal(true)} className="btn-primary">New Announcement</button>} />
+      ) : (
+        <div className="space-y-4">
+          {items.map((a) => (
+            <div key={a._id} className="card p-5">
+              <div className="flex justify-between">
+                <h3 className="font-semibold">{a.title}</h3>
+                <span className="text-xs text-gray-500 capitalize">{a.targetAudience} · {formatDate(a.sentAt)}</span>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">{a.message}</p>
             </div>
-            <p className="text-sm text-gray-600 mt-2">{a.message}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <Modal open={modal} onClose={() => setModal(false)} title="New Announcement">
         <form onSubmit={handleSubmit} className="space-y-4">

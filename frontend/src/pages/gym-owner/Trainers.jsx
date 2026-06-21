@@ -2,13 +2,12 @@ import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
-import { LoadingSpinner, Modal, StatusBadge } from '../../components/ui';
+import { LoadingSpinner, Modal, StatusBadge, EmptyState } from '../../components/ui';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 
 const PERMISSIONS = [
   { key: 'addMember', label: 'Add Member' },
   { key: 'renewMembership', label: 'Renew Membership' },
-  { key: 'markAttendance', label: 'Mark Attendance' },
   { key: 'viewAssignedMembers', label: 'View Assigned Members' },
   { key: 'collectFees', label: 'Collect Fees' },
 ];
@@ -20,7 +19,17 @@ export default function Trainers() {
   const [editModal, setEditModal] = useState(null);
   const [form, setForm] = useState({ name: '', email: '', mobile: '', permissions: {} });
 
-  const load = () => api.get('/trainers').then((res) => setTrainers(res.data)).finally(() => setLoading(false));
+  const load = () => {
+    setLoading(true);
+    api.get('/trainers')
+      .then((res) => setTrainers(Array.isArray(res.data) ? res.data : []))
+      .catch((err) => {
+        console.error('Failed to load trainers:', err);
+        toast.error('Failed to load trainers');
+        setTrainers([]);
+      })
+      .finally(() => setLoading(false));
+  };
   useEffect(load, []);
 
   const handleCreate = async (e) => {
@@ -57,32 +66,36 @@ export default function Trainers() {
         <button onClick={() => setModal(true)} className="btn-primary"><Plus size={18} /> Add Trainer</button>
       </div>
 
-      <div className="card overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="text-left p-3">Name</th>
-              <th className="text-left p-3">Email</th>
-              <th className="text-left p-3">Members</th>
-              <th className="text-left p-3">Status</th>
-              <th className="text-left p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {trainers.map((t) => (
-              <tr key={t._id} className="border-b hover:bg-gray-50">
-                <td className="p-3 font-medium">{t.name}</td>
-                <td className="p-3">{t.email}</td>
-                <td className="p-3">{t.memberCount}</td>
-                <td className="p-3"><StatusBadge status={t.status} /></td>
-                <td className="p-3">
-                  <button onClick={() => setEditModal({ ...t })} className="text-primary-600 hover:underline">Edit</button>
-                </td>
+      {trainers.length === 0 ? (
+        <EmptyState title="No trainers found" description="Add your first trainer to get started" action={<button onClick={() => setModal(true)} className="btn-primary">Add Trainer</button>} />
+      ) : (
+        <div className="card overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="text-left p-3">Name</th>
+                <th className="text-left p-3">Email</th>
+                <th className="text-left p-3">Members</th>
+                <th className="text-left p-3">Status</th>
+                <th className="text-left p-3">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {trainers.map((t) => (
+                <tr key={t._id} className="border-b hover:bg-gray-50">
+                  <td className="p-3 font-medium">{t.name}</td>
+                  <td className="p-3">{t.email}</td>
+                  <td className="p-3">{t.memberCount}</td>
+                  <td className="p-3"><StatusBadge status={t.status} /></td>
+                  <td className="p-3">
+                    <button onClick={() => setEditModal({ ...t })} className="text-primary-600 hover:underline">Edit</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <Modal open={modal} onClose={() => setModal(false)} title="Add Trainer">
         <form onSubmit={handleCreate} className="space-y-4">

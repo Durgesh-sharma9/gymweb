@@ -71,9 +71,9 @@ export default function OwnerDashboard() {
         </div>
 
         <div className="card p-5">
-          <h3 className="font-semibold mb-3">Today's Attendance</h3>
-          <p className="text-2xl font-bold">{data.todayAttendance}</p>
-          <p className="text-sm text-gray-500">{data.pendingRegistrations} pending registrations</p>
+          <h3 className="font-semibold mb-3">Pending Registrations</h3>
+          <p className="text-2xl font-bold">{data.pendingRegistrations}</p>
+          <p className="text-sm text-gray-500">Awaiting approval</p>
         </div>
 
         {data.upcomingRenewals?.length > 0 && (

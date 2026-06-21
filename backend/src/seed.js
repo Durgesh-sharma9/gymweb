@@ -28,7 +28,7 @@ const seed = async () => {
   const planCount = await PlatformPlan.countDocuments();
   if (planCount === 0) {
     await PlatformPlan.insertMany([
-      { name: 'Basic', price: 999, durationMonths: 1, maxMembers: 100, maxTrainers: 2, features: ['Member Management', 'Attendance'] },
+      { name: 'Basic', price: 999, durationMonths: 1, maxMembers: 100, maxTrainers: 2, features: ['Member Management', 'Fee Collection'] },
       { name: 'Pro', price: 2499, durationMonths: 1, maxMembers: 500, maxTrainers: 10, features: ['All Basic', 'Expenses', 'Analytics'] },
       { name: 'Enterprise', price: 4999, durationMonths: 1, maxMembers: null, maxTrainers: null, features: ['Unlimited', 'Priority Support'] },
     ]);

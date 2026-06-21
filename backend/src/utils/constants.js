@@ -35,7 +35,6 @@ export const RECEIPT_TEMPLATES = ['professional_white', 'modern_dark', 'premium'
 export const DEFAULT_TRAINER_PERMISSIONS = {
   addMember: false,
   renewMembership: false,
-  markAttendance: true,
   viewAssignedMembers: true,
   collectFees: false,
 };
@@ -51,6 +50,5 @@ export const ACTIVITY_ACTIONS = {
   TRAINER_ADDED: 'trainer_added',
   TRAINER_UPDATED: 'trainer_updated',
   EXPENSE_ADDED: 'expense_added',
-  ATTENDANCE_MARKED: 'attendance_marked',
   REGISTRATION_APPROVED: 'registration_approved',
 };

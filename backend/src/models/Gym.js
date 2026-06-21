@@ -4,7 +4,7 @@ import { STATUS } from '../utils/constants.js';
 const gymSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, lowercase: true },
+    slug: { type: String, required: true, lowercase: true },
     logo: String,
     address: String,
     city: String,

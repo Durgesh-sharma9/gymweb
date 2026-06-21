@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Dumbbell, Users, QrCode, TrendingUp, Receipt, MessageSquare, Zap, Shield, Clock, BarChart3, Calendar, Wallet } from 'lucide-react';
+import { Dumbbell, Users, QrCode, TrendingUp, Receipt, MessageSquare, Zap, Shield, Clock, BarChart3, Wallet } from 'lucide-react';
 
 export default function Features() {
   return (
@@ -41,12 +41,6 @@ export default function Features() {
               features={['Unique QR codes', 'Fast check-in', 'Secure access', 'Mobile-friendly']}
             />
             <FeatureCard 
-              icon={<Calendar size={40} />}
-              title="Attendance Tracking"
-              description="Real-time attendance tracking with detailed reports. Monitor member visit patterns and trainer availability."
-              features={['Real-time tracking', 'Detailed reports', 'Visit patterns', 'Trainer availability']}
-            />
-            <FeatureCard 
               icon={<TrendingUp size={40} />}
               title="Revenue Dashboard"
               description="Visual analytics for your gym's financial performance. Track revenue, expenses, and growth metrics."
@@ -73,8 +67,8 @@ export default function Features() {
             <FeatureCard 
               icon={<BarChart3 size={40} />}
               title="Advanced Reports"
-              description="Generate detailed reports on attendance, revenue, member retention, and trainer performance."
-              features={['Attendance reports', 'Revenue analytics', 'Retention metrics', 'Performance data']}
+              description="Generate detailed reports on revenue, member retention, and trainer performance."
+              features={['Revenue analytics', 'Retention metrics', 'Performance data', 'Financial insights']}
             />
           </div>
         </div>

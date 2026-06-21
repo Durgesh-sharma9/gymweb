@@ -18,6 +18,12 @@ import SuperAdminDashboard from './pages/super-admin/Dashboard';
 import GymOwners from './pages/super-admin/GymOwners';
 import Gyms from './pages/super-admin/Gyms';
 import PlatformPlans from './pages/super-admin/PlatformPlans';
+import GymDetails from './pages/super-admin/GymDetails';
+import SubscriptionRequests from './pages/super-admin/SubscriptionRequests';
+import Revenue from './pages/super-admin/Revenue';
+import Templates from './pages/super-admin/Templates';
+import SuperAdminSettings from './pages/super-admin/Settings';
+import ExportCenter from './pages/super-admin/ExportCenter';
 
 import OwnerDashboard from './pages/gym-owner/Dashboard';
 import Members from './pages/gym-owner/Members';
@@ -25,7 +31,6 @@ import MemberDetail from './pages/gym-owner/MemberDetail';
 import Plans from './pages/gym-owner/Plans';
 import Trainers from './pages/gym-owner/Trainers';
 import Payments from './pages/gym-owner/Payments';
-import Attendance from './pages/gym-owner/Attendance';
 import Expenses from './pages/gym-owner/Expenses';
 import Settings from './pages/gym-owner/Settings';
 import Registrations from './pages/gym-owner/Registrations';
@@ -35,7 +40,6 @@ import ActivityLogs from './pages/gym-owner/ActivityLogs';
 import TrainerDashboard from './pages/trainer/Dashboard';
 
 import PublicRegister from './pages/public/Register';
-import PublicCheckIn from './pages/public/CheckIn';
 import PublicInvoice from './pages/public/PublicInvoice';
 
 import OnboardingWizard from './pages/gym-owner/OnboardingWizard';
@@ -70,14 +74,19 @@ export default function App() {
 
       {/* Public */}
       <Route path="/register/:gymSlug" element={<PublicRegister />} />
-      <Route path="/checkin/:gymSlug" element={<PublicCheckIn />} />
       <Route path="/invoice/:token" element={<PublicInvoice />} />
 
       {/* Super Admin */}
       <Route path="/super-admin/dashboard" element={<ProtectedRoute roles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
       <Route path="/super-admin/gym-owners" element={<ProtectedRoute roles={['super_admin']}><GymOwners /></ProtectedRoute>} />
       <Route path="/super-admin/gyms" element={<ProtectedRoute roles={['super_admin']}><Gyms /></ProtectedRoute>} />
+      <Route path="/super-admin/gyms/:id" element={<ProtectedRoute roles={['super_admin']}><GymDetails /></ProtectedRoute>} />
       <Route path="/super-admin/plans" element={<ProtectedRoute roles={['super_admin']}><PlatformPlans /></ProtectedRoute>} />
+      <Route path="/super-admin/subscription-requests" element={<ProtectedRoute roles={['super_admin']}><SubscriptionRequests /></ProtectedRoute>} />
+      <Route path="/super-admin/revenue" element={<ProtectedRoute roles={['super_admin']}><Revenue /></ProtectedRoute>} />
+      <Route path="/super-admin/templates" element={<ProtectedRoute roles={['super_admin']}><Templates /></ProtectedRoute>} />
+      <Route path="/super-admin/settings" element={<ProtectedRoute roles={['super_admin']}><SuperAdminSettings /></ProtectedRoute>} />
+      <Route path="/super-admin/export" element={<ProtectedRoute roles={['super_admin']}><ExportCenter /></ProtectedRoute>} />
 
       {/* Gym Owner */}
       <Route path="/gym/dashboard" element={<ProtectedRoute roles={['gym_owner']}><OwnerDashboard /></ProtectedRoute>} />
@@ -86,7 +95,6 @@ export default function App() {
       <Route path="/gym/plans" element={<ProtectedRoute roles={['gym_owner']}><Plans /></ProtectedRoute>} />
       <Route path="/gym/trainers" element={<ProtectedRoute roles={['gym_owner']}><Trainers /></ProtectedRoute>} />
       <Route path="/gym/payments" element={<ProtectedRoute roles={['gym_owner']}><Payments /></ProtectedRoute>} />
-      <Route path="/gym/attendance" element={<ProtectedRoute roles={['gym_owner', 'trainer']}><Attendance /></ProtectedRoute>} />
       <Route path="/gym/expenses" element={<ProtectedRoute roles={['gym_owner']}><Expenses /></ProtectedRoute>} />
       <Route path="/gym/settings" element={<ProtectedRoute roles={['gym_owner']}><Settings /></ProtectedRoute>} />
       <Route path="/gym/registrations" element={<ProtectedRoute roles={['gym_owner', 'trainer']}><Registrations /></ProtectedRoute>} />
@@ -96,7 +104,6 @@ export default function App() {
       {/* Trainer */}
       <Route path="/trainer/dashboard" element={<ProtectedRoute roles={['trainer']}><TrainerDashboard /></ProtectedRoute>} />
       <Route path="/trainer/members" element={<ProtectedRoute roles={['trainer']}><Members /></ProtectedRoute>} />
-      <Route path="/trainer/attendance" element={<ProtectedRoute roles={['trainer']}><Attendance /></ProtectedRoute>} />
       <Route path="/trainer/registrations" element={<ProtectedRoute roles={['trainer']}><Registrations /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />

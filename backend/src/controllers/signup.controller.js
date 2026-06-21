@@ -4,10 +4,13 @@ import { Gym } from '../models/Gym.js';
 import { EmailVerification } from '../models/EmailVerification.js';
 import { MembershipPlan } from '../models/MembershipPlan.js';
 import { GymSettings } from '../models/GymSettings.js';
+
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { catchAsync } from '../utils/catchAsync.js';
+
 import { ROLES, STATUS } from '../utils/constants.js';
+
 import { sendVerificationEmail } from '../services/email.service.js';
 
 export const signup = catchAsync(async (req, res) => {
@@ -25,30 +28,45 @@ export const signup = catchAsync(async (req, res) => {
     throw new ApiError(400, 'Password must be at least 6 characters');
   }
 
-  const existingUser = await User.findOne({ email: email.toLowerCase() });
+  const existingUser = await User.findOne({
+    email: email.toLowerCase(),
+  });
+
   if (existingUser) {
     throw new ApiError(400, 'Email already registered');
   }
 
-  const gymSlug = gymName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-
-  const existingGym = await Gym.findOne({ slug: gymSlug });
-  if (existingGym) {
-    throw new ApiError(400, 'Gym name already taken');
-  }
+  const gymSlug =
+    gymName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') +
+    '-' +
+    Date.now();
 
   const trialStart = new Date();
   const trialEnd = new Date();
   trialEnd.setDate(trialEnd.getDate() + 14);
 
+  // Create User First
+  const user = await User.create({
+    name: ownerName,
+    email: email.toLowerCase(),
+    mobile,
+    password,
+    role: ROLES.GYM_OWNER,
+    status: STATUS.ACTIVE,
+    emailVerified: false,
+    hasCompletedOnboarding: false,
+  });
+
+  // Create Gym
   const gym = await Gym.create({
     name: gymName,
     slug: gymSlug,
     mobile,
     email,
+    ownerId: user._id,
     trialStart,
     trialEnd,
     isTrial: true,
@@ -56,22 +74,12 @@ export const signup = catchAsync(async (req, res) => {
     status: STATUS.ACTIVE,
   });
 
-  const user = await User.create({
-    name: ownerName,
-    email: email.toLowerCase(),
-    mobile,
-    password,
-    role: ROLES.GYM_OWNER,
-    gymId: gym._id,
-    status: STATUS.ACTIVE,
-    emailVerified: false,
-    hasCompletedOnboarding: false,
-  });
-
-  gym.ownerId = user._id;
-  await gym.save();
+  // Link user with gym
+  user.gymId = gym._id;
+  await user.save();
 
   const verificationToken = crypto.randomBytes(32).toString('hex');
+
   const expiresAt = new Date();
   expiresAt.setHours(expiresAt.getHours() + 24);
 

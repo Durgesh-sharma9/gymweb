@@ -3,7 +3,6 @@ import { Membership } from '../models/Membership.js';
 import { Payment } from '../models/Payment.js';
 import { Expense } from '../models/Expense.js';
 import { User } from '../models/User.js';
-import { Attendance } from '../models/Attendance.js';
 import { RegistrationRequest } from '../models/RegistrationRequest.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { catchAsync } from '../utils/catchAsync.js';
@@ -18,7 +17,7 @@ export const getOwnerDashboard = catchAsync(async (req, res) => {
   const [
     totalMembers, activeMembers, expiredMembers, inactiveMembers, totalTrainers,
     monthlyPayments, totalPayments, monthlyExpenses, totalExpenses,
-    upcomingRenewals, membersWithDues, todayAttendance, pendingRegistrations,
+    upcomingRenewals, membersWithDues, pendingRegistrations,
   ] = await Promise.all([
     Member.countDocuments({ gymId }),
     Member.countDocuments({ gymId, status: MEMBER_STATUS.ACTIVE }),
@@ -46,7 +45,6 @@ export const getOwnerDashboard = catchAsync(async (req, res) => {
       { $match: { gymId, dueAmount: { $gt: 0 } } },
       { $group: { _id: null, totalDue: { $sum: '$dueAmount' }, count: { $sum: 1 } } },
     ]),
-    Attendance.countDocuments({ gymId, checkInTime: { $gte: new Date(now.setHours(0, 0, 0, 0)) } }),
     RegistrationRequest.countDocuments({ gymId, status: STATUS.PENDING }),
   ]);
 
@@ -64,7 +62,6 @@ export const getOwnerDashboard = catchAsync(async (req, res) => {
     upcomingRenewals,
     totalDueAmount: membersWithDues[0]?.totalDue || 0,
     membersWithDuesCount: membersWithDues[0]?.count || 0,
-    todayAttendance,
     pendingRegistrations,
     expiryReminders: await getExpiryReminders(gymId),
   }));

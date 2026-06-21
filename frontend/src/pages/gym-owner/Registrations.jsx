@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
-import { LoadingSpinner, StatusBadge } from '../../components/ui';
+import { LoadingSpinner, StatusBadge, EmptyState } from '../../components/ui';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { formatDate } from '../../utils/helpers';
 
@@ -9,7 +9,17 @@ export default function Registrations() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const load = () => api.get('/registrations?status=pending').then((res) => setRequests(res.data)).finally(() => setLoading(false));
+  const load = () => {
+    setLoading(true);
+    api.get('/registrations?status=pending')
+      .then((res) => setRequests(Array.isArray(res.data) ? res.data : []))
+      .catch((err) => {
+        console.error('Failed to load registrations:', err);
+        toast.error('Failed to load registrations');
+        setRequests([]);
+      })
+      .finally(() => setLoading(false));
+  };
   useEffect(load, []);
 
   const approve = async (id) => {
@@ -40,7 +50,7 @@ export default function Registrations() {
     <DashboardLayout>
       <h1 className="text-2xl font-bold mb-6">Pending Registrations</h1>
       {requests.length === 0 ? (
-        <p className="text-gray-500">No pending registration requests</p>
+        <EmptyState title="No pending registrations" description="Registration requests will appear here when members sign up" />
       ) : (
         <div className="space-y-4">
           {requests.map((r) => (
