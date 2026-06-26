@@ -17,8 +17,8 @@ export const generateInvoiceNumber = async (gymId) => {
     { $inc: { invoiceCounter: 1 } },
     { new: true, upsert: true }
   );
-  const num = String(settings.invoiceCounter).padStart(5, '0');
-  return `${settings.invoicePrefix}-${num}`;
+  const num = String(settings.invoiceCounter).padStart(6, '0');
+  return `REC${num}`;
 };
 
 export const createInvoice = async ({ gym, member, membership, payment, planName, settings }) => {
@@ -42,7 +42,7 @@ export const createInvoice = async ({ gym, member, membership, payment, planName
       mobile: gym.mobile,
       email: gym.email,
     },
-    memberSnapshot: { fullName: member.fullName, mobile: member.mobile },
+    memberSnapshot: { memberId: member.memberId, fullName: member.fullName, mobile: member.mobile },
     membershipSnapshot: {
       planName,
       startDate: membership.startDate,
@@ -73,38 +73,123 @@ export const generateInvoicePDF = (invoice) => {
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
 
-    const { gymSnapshot, memberSnapshot, membershipSnapshot, lineItems } = invoice;
+    const { gymSnapshot, memberSnapshot, membershipSnapshot, lineItems, template } = invoice;
 
-    doc.fontSize(20).text(gymSnapshot.name, { align: 'center' });
-    doc.fontSize(10).text(gymSnapshot.address || '', { align: 'center' });
-    doc.text(`${gymSnapshot.mobile || ''} | ${gymSnapshot.email || ''}`, { align: 'center' });
-    doc.moveDown();
-
-    doc.fontSize(14).text('INVOICE', { align: 'center' });
-    doc.fontSize(10).text(`Invoice No: ${invoice.invoiceNumber}`, { align: 'right' });
-    doc.text(`Date: ${formatDate(invoice.createdAt)}`, { align: 'right' });
-    doc.moveDown();
-
-    doc.text(`Member: ${memberSnapshot.fullName}`);
-    doc.text(`Mobile: ${memberSnapshot.mobile}`);
-    doc.text(`Plan: ${membershipSnapshot.planName}`);
-    doc.text(`Period: ${formatDate(membershipSnapshot.startDate)} - ${formatDate(membershipSnapshot.endDate)}`);
-    doc.moveDown();
-
-    doc.text(`Base Amount: ${formatCurrency(lineItems.baseAmount)}`);
-    if (lineItems.discount > 0) {
-      doc.text(`Discount: -${formatCurrency(lineItems.discount)}`);
+    if (template === 'professional_white') {
+      generateProfessionalWhite(doc, invoice);
+    } else if (template === 'modern_blue') {
+      generateModernBlue(doc, invoice);
+    } else if (template === 'premium_gold') {
+      generatePremiumGold(doc, invoice);
+    } else {
+      generateProfessionalWhite(doc, invoice);
     }
-    if (lineItems.tax > 0) {
-      doc.text(`Tax: ${formatCurrency(lineItems.tax)}`);
-    }
-    doc.fontSize(12).text(`Total: ${formatCurrency(lineItems.finalAmount)}`, { underline: true });
-    doc.text(`Paid: ${formatCurrency(lineItems.paidAmount)}`);
-    if (lineItems.dueAmount > 0) {
-      doc.text(`Due: ${formatCurrency(lineItems.dueAmount)}`);
-    }
-    doc.text(`Payment Method: ${invoice.paymentMethod?.toUpperCase()}`);
 
     doc.end();
   });
+};
+
+const generateProfessionalWhite = (doc, invoice) => {
+  const { gymSnapshot, memberSnapshot, membershipSnapshot, lineItems } = invoice;
+
+  doc.fontSize(20).text(gymSnapshot.name, { align: 'center' });
+  doc.fontSize(10).text(gymSnapshot.address || '', { align: 'center' });
+  doc.text(`${gymSnapshot.mobile || ''} | ${gymSnapshot.email || ''}`, { align: 'center' });
+  doc.moveDown();
+
+  doc.fontSize(14).text('RECEIPT', { align: 'center' });
+  doc.fontSize(10).text(`Receipt No: ${invoice.invoiceNumber}`, { align: 'right' });
+  doc.text(`Date: ${formatDate(invoice.createdAt)}`, { align: 'right' });
+  doc.moveDown();
+
+  doc.text(`Member ID: ${memberSnapshot.memberId || '-'}`);
+  doc.text(`Member: ${memberSnapshot.fullName}`);
+  doc.text(`Mobile: ${memberSnapshot.mobile}`);
+  doc.text(`Plan: ${membershipSnapshot.planName}`);
+  doc.text(`Period: ${formatDate(membershipSnapshot.startDate)} - ${formatDate(membershipSnapshot.endDate)}`);
+  doc.moveDown();
+
+  doc.text(`Plan Amount: ${formatCurrency(lineItems.baseAmount)}`);
+  if (lineItems.discount > 0) {
+    doc.text(`Discount: -${formatCurrency(lineItems.discount)}`);
+  }
+  if (lineItems.tax > 0) {
+    doc.text(`Tax: ${formatCurrency(lineItems.tax)}`);
+  }
+  doc.fontSize(12).text(`Final Amount: ${formatCurrency(lineItems.finalAmount)}`, { underline: true });
+  doc.text(`Paid: ${formatCurrency(lineItems.paidAmount)}`);
+  if (lineItems.dueAmount > 0) {
+    doc.text(`Due: ${formatCurrency(lineItems.dueAmount)}`);
+  }
+  doc.text(`Payment Method: ${invoice.paymentMethod?.toUpperCase()}`);
+};
+
+const generateModernBlue = (doc, invoice) => {
+  const { gymSnapshot, memberSnapshot, membershipSnapshot, lineItems } = invoice;
+
+  doc.fillColor('#1e40af').fontSize(24).text(gymSnapshot.name, { align: 'center' });
+  doc.fillColor('#000').fontSize(10).text(gymSnapshot.address || '', { align: 'center' });
+  doc.text(`${gymSnapshot.mobile || ''} | ${gymSnapshot.email || ''}`, { align: 'center' });
+  doc.moveDown();
+
+  doc.fillColor('#1e40af').fontSize(16).text('RECEIPT', { align: 'center' });
+  doc.fillColor('#000').fontSize(10).text(`Receipt No: ${invoice.invoiceNumber}`, { align: 'right' });
+  doc.text(`Date: ${formatDate(invoice.createdAt)}`, { align: 'right' });
+  doc.moveDown();
+
+  doc.text(`Member ID: ${memberSnapshot.memberId || '-'}`);
+  doc.text(`Member: ${memberSnapshot.fullName}`);
+  doc.text(`Mobile: ${memberSnapshot.mobile}`);
+  doc.text(`Plan: ${membershipSnapshot.planName}`);
+  doc.text(`Period: ${formatDate(membershipSnapshot.startDate)} - ${formatDate(membershipSnapshot.endDate)}`);
+  doc.moveDown();
+
+  doc.text(`Plan Amount: ${formatCurrency(lineItems.baseAmount)}`);
+  if (lineItems.discount > 0) {
+    doc.text(`Discount: -${formatCurrency(lineItems.discount)}`);
+  }
+  if (lineItems.tax > 0) {
+    doc.text(`Tax: ${formatCurrency(lineItems.tax)}`);
+  }
+  doc.fillColor('#1e40af').fontSize(12).text(`Final Amount: ${formatCurrency(lineItems.finalAmount)}`, { underline: true });
+  doc.fillColor('#000').text(`Paid: ${formatCurrency(lineItems.paidAmount)}`);
+  if (lineItems.dueAmount > 0) {
+    doc.text(`Due: ${formatCurrency(lineItems.dueAmount)}`);
+  }
+  doc.text(`Payment Method: ${invoice.paymentMethod?.toUpperCase()}`);
+};
+
+const generatePremiumGold = (doc, invoice) => {
+  const { gymSnapshot, memberSnapshot, membershipSnapshot, lineItems } = invoice;
+
+  doc.fillColor('#b8860b').fontSize(24).text(gymSnapshot.name, { align: 'center' });
+  doc.fillColor('#000').fontSize(10).text(gymSnapshot.address || '', { align: 'center' });
+  doc.text(`${gymSnapshot.mobile || ''} | ${gymSnapshot.email || ''}`, { align: 'center' });
+  doc.moveDown();
+
+  doc.fillColor('#b8860b').fontSize(16).text('RECEIPT', { align: 'center' });
+  doc.fillColor('#000').fontSize(10).text(`Receipt No: ${invoice.invoiceNumber}`, { align: 'right' });
+  doc.text(`Date: ${formatDate(invoice.createdAt)}`, { align: 'right' });
+  doc.moveDown();
+
+  doc.text(`Member ID: ${memberSnapshot.memberId || '-'}`);
+  doc.text(`Member: ${memberSnapshot.fullName}`);
+  doc.text(`Mobile: ${memberSnapshot.mobile}`);
+  doc.text(`Plan: ${membershipSnapshot.planName}`);
+  doc.text(`Period: ${formatDate(membershipSnapshot.startDate)} - ${formatDate(membershipSnapshot.endDate)}`);
+  doc.moveDown();
+
+  doc.text(`Plan Amount: ${formatCurrency(lineItems.baseAmount)}`);
+  if (lineItems.discount > 0) {
+    doc.text(`Discount: -${formatCurrency(lineItems.discount)}`);
+  }
+  if (lineItems.tax > 0) {
+    doc.text(`Tax: ${formatCurrency(lineItems.tax)}`);
+  }
+  doc.fillColor('#b8860b').fontSize(12).text(`Final Amount: ${formatCurrency(lineItems.finalAmount)}`, { underline: true });
+  doc.fillColor('#000').text(`Paid: ${formatCurrency(lineItems.paidAmount)}`);
+  if (lineItems.dueAmount > 0) {
+    doc.text(`Due: ${formatCurrency(lineItems.dueAmount)}`);
+  }
+  doc.text(`Payment Method: ${invoice.paymentMethod?.toUpperCase()}`);
 };

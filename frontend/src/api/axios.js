@@ -12,7 +12,12 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (res) => res.data,
+  (res) => {
+    if (res.config.responseType === 'arraybuffer' || res.config.responseType === 'blob') {
+      return res;
+    }
+    return res.data;
+  },
   (err) => {
     const message = err.response?.data?.message || 'Something went wrong';
     if (err.response?.status === 401 && !window.location.pathname.includes('/login')) {

@@ -29,8 +29,8 @@ export default function SuperAdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard title="Total Members" value={data.totalMembers} icon={Users} color="purple" />
         <StatCard title="Total Trainers" value={data.totalTrainers} icon={Users} color="blue" />
-        <StatCard title="Monthly Revenue" value={formatCurrency(data.monthlyRevenue)} icon={TrendingUp} color="green" />
-        <StatCard title="Total Revenue" value={formatCurrency(data.totalRevenue)} icon={TrendingUp} color="blue" />
+        <StatCard title="Monthly SaaS Revenue" value={formatCurrency(data.monthlySaaSRevenue)} icon={TrendingUp} color="green" />
+        <StatCard title="Total SaaS Revenue" value={formatCurrency(data.totalSaaSRevenue)} icon={TrendingUp} color="blue" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

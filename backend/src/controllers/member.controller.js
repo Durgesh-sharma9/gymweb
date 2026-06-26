@@ -73,12 +73,19 @@ export const getMember = catchAsync(async (req, res) => {
   res.json(new ApiResponse(200, { member, history, payments }));
 });
 
+const generateMemberId = async (gymId) => {
+  const count = await Member.countDocuments({ gymId });
+  const memberId = `GYM${String(count + 1).padStart(4, '0')}`;
+  return memberId;
+};
+
 export const createMemberWithMembership = catchAsync(async (req, res) => {
   const gymId = req.gymId;
   const {
-    fullName, mobile, gender, dateOfBirth, age, address, photo, fitnessGoal, notes,
+    fullName, mobile, gender, dateOfBirth, address, photo,
+    emergencyContactName, emergencyContactMobile, notes,
     planId, isCustomPlan, customPlan, startDate, discountType, discountValue,
-    paidAmount, paymentMethod, assignedTrainerId,
+    paidAmount, paymentMethod,
   } = req.body;
 
   if (!fullName || !mobile) throw new ApiError(400, 'Name and mobile required');
@@ -87,6 +94,8 @@ export const createMemberWithMembership = catchAsync(async (req, res) => {
   if (existing) {
     throw new ApiError(409, 'Member with this mobile already exists', { member: existing });
   }
+
+  const memberId = await generateMemberId(gymId);
 
   const settings = await GymSettings.findOne({ gymId });
   let baseAmount, durationType, durationValue, planName;
@@ -118,9 +127,12 @@ export const createMemberWithMembership = catchAsync(async (req, res) => {
   const paid = paidAmount ?? pricing.finalAmount;
   const due = Math.max(0, pricing.finalAmount - paid);
 
+  const age = dateOfBirth ? new Date().getFullYear() - new Date(dateOfBirth).getFullYear() : null;
+
   const member = await Member.create({
-    gymId, fullName, mobile, gender, dateOfBirth, age, address, photo, fitnessGoal, notes,
-    assignedTrainerId, createdBy: req.user._id, status: MEMBER_STATUS.ACTIVE,
+    gymId, memberId, fullName, mobile, gender, dateOfBirth, age, address, photo,
+    emergencyContactName, emergencyContactMobile, notes,
+    createdBy: req.user._id, status: MEMBER_STATUS.ACTIVE,
   });
 
   const start = startDate ? new Date(startDate) : new Date();

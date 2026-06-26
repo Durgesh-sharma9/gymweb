@@ -30,7 +30,7 @@ export const EXPENSE_CATEGORIES = [
   'other',
 ];
 
-export const RECEIPT_TEMPLATES = ['professional_white', 'modern_dark', 'premium'];
+export const RECEIPT_TEMPLATES = ['professional_white', 'modern_blue', 'premium_gold'];
 
 export const DEFAULT_TRAINER_PERMISSIONS = {
   addMember: false,

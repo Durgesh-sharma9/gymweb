@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, UserCog, CreditCard,
   Receipt, Settings, LogOut, Dumbbell, Megaphone, ClipboardList,
-  UserPlus, Bell, Wallet,
+  UserPlus, Bell, Wallet, TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -16,6 +16,7 @@ const ownerLinks = [
   { to: '/gym/registrations', icon: UserPlus, label: 'Registrations' },
   { to: '/gym/announcements', icon: Megaphone, label: 'Announcements' },
   { to: '/gym/activity-logs', icon: ClipboardList, label: 'Activity Logs' },
+  { to: '/gym/subscription-request', icon: TrendingUp, label: 'Subscription' },
   { to: '/gym/settings', icon: Settings, label: 'Settings' },
 ];
 

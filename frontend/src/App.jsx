@@ -36,6 +36,7 @@ import Settings from './pages/gym-owner/Settings';
 import Registrations from './pages/gym-owner/Registrations';
 import Announcements from './pages/gym-owner/Announcements';
 import ActivityLogs from './pages/gym-owner/ActivityLogs';
+import SubscriptionRequest from './pages/gym-owner/SubscriptionRequest';
 
 import TrainerDashboard from './pages/trainer/Dashboard';
 
@@ -100,6 +101,7 @@ export default function App() {
       <Route path="/gym/registrations" element={<ProtectedRoute roles={['gym_owner', 'trainer']}><Registrations /></ProtectedRoute>} />
       <Route path="/gym/announcements" element={<ProtectedRoute roles={['gym_owner']}><Announcements /></ProtectedRoute>} />
       <Route path="/gym/activity-logs" element={<ProtectedRoute roles={['gym_owner']}><ActivityLogs /></ProtectedRoute>} />
+      <Route path="/gym/subscription-request" element={<ProtectedRoute roles={['gym_owner']}><SubscriptionRequest /></ProtectedRoute>} />
 
       {/* Trainer */}
       <Route path="/trainer/dashboard" element={<ProtectedRoute roles={['trainer']}><TrainerDashboard /></ProtectedRoute>} />

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
 import { LoadingSpinner, Modal, StatusBadge, EmptyState } from '../../components/ui';
@@ -14,6 +15,7 @@ const PERMISSIONS = [
 
 export default function Trainers() {
   const [trainers, setTrainers] = useState([]);
+  const [limits, setLimits] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
   const [editModal, setEditModal] = useState(null);
@@ -21,11 +23,17 @@ export default function Trainers() {
 
   const load = () => {
     setLoading(true);
-    api.get('/trainers')
-      .then((res) => setTrainers(Array.isArray(res.data) ? res.data : []))
+    Promise.all([
+      api.get('/trainers'),
+      api.get('/gym/limits'),
+    ])
+      .then(([t, l]) => {
+        setTrainers(Array.isArray(t.data) ? t.data : []);
+        setLimits(l.data);
+      })
       .catch((err) => {
-        console.error('Failed to load trainers:', err);
-        toast.error('Failed to load trainers');
+        console.error('Failed to load data:', err);
+        toast.error('Failed to load data');
         setTrainers([]);
       })
       .finally(() => setLoading(false));
@@ -34,6 +42,10 @@ export default function Trainers() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    if (limits?.trainerLimitReached) {
+      toast.error(`Trainer limit reached (${limits.currentTrainers}/${limits.maxTrainers}). Upgrade your plan to add more trainers.`);
+      return;
+    }
     try {
       await api.post('/trainers', form);
       toast.success('Trainer created. Credentials sent via email.');
@@ -63,8 +75,27 @@ export default function Trainers() {
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Trainers</h1>
-        <button onClick={() => setModal(true)} className="btn-primary"><Plus size={18} /> Add Trainer</button>
+        <button
+          onClick={() => setModal(true)}
+          className="btn-primary"
+          disabled={limits?.trainerLimitReached}
+        >
+          <Plus size={18} /> Add Trainer
+        </button>
       </div>
+
+      {limits?.trainerLimitReached && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 flex items-center gap-3">
+          <AlertCircle className="text-yellow-600" size={20} />
+          <div>
+            <p className="font-medium text-yellow-800">Trainer limit reached</p>
+            <p className="text-sm text-yellow-700">
+              You have reached your plan limit of {limits.maxTrainers} trainers. 
+              <Link to="/gym/subscription-request" className="underline ml-2">Upgrade your plan</Link> to add more trainers.
+            </p>
+          </div>
+        </div>
+      )}
 
       {trainers.length === 0 ? (
         <EmptyState title="No trainers found" description="Add your first trainer to get started" action={<button onClick={() => setModal(true)} className="btn-primary">Add Trainer</button>} />

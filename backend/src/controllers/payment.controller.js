@@ -82,6 +82,30 @@ export const getPayments = catchAsync(async (req, res) => {
   res.json(new ApiResponse(200, { payments, total }));
 });
 
+export const getInvoices = catchAsync(async (req, res) => {
+  const { search, page = 1, limit = 20 } = req.query;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const filter = { gymId: req.gymId };
+
+  if (search) {
+    filter.$or = [
+      { invoiceNumber: { $regex: search, $options: 'i' } },
+      { 'memberSnapshot.fullName': { $regex: search, $options: 'i' } },
+      { 'memberSnapshot.mobile': { $regex: search, $options: 'i' } },
+    ];
+  }
+
+  const [invoices, total] = await Promise.all([
+    Invoice.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit)),
+    Invoice.countDocuments(filter),
+  ]);
+
+  res.json(new ApiResponse(200, { invoices, total }));
+});
+
 export const getInvoice = catchAsync(async (req, res) => {
   const invoice = await Invoice.findOne({ _id: req.params.id, gymId: req.gymId });
   if (!invoice) throw new ApiError(404, 'Invoice not found');

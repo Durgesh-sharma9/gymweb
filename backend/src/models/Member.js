@@ -4,6 +4,7 @@ import { MEMBER_STATUS } from '../utils/constants.js';
 const memberSchema = new mongoose.Schema(
   {
     gymId: { type: mongoose.Schema.Types.ObjectId, ref: 'Gym', required: true },
+    memberId: { type: String, unique: true, sparse: true },
     fullName: { type: String, required: true, trim: true },
     mobile: { type: String, required: true, trim: true },
     gender: { type: String, enum: ['male', 'female', 'other'] },
@@ -11,7 +12,8 @@ const memberSchema = new mongoose.Schema(
     age: Number,
     address: String,
     photo: String,
-    fitnessGoal: String,
+    emergencyContactName: String,
+    emergencyContactMobile: String,
     notes: String,
     status: {
       type: String,
@@ -25,6 +27,7 @@ const memberSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+memberSchema.index({ gymId: 1, memberId: 1 }, { unique: true, sparse: true });
 memberSchema.index({ gymId: 1, status: 1 });
 memberSchema.index({ gymId: 1, assignedTrainerId: 1 });
 memberSchema.index(

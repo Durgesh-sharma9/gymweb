@@ -21,12 +21,12 @@ export default function Revenue() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="card p-5">
-          <p className="text-sm text-gray-500">Total Revenue</p>
-          <p className="text-2xl font-bold text-green-600">{formatCurrency(data.totalRevenue)}</p>
+          <p className="text-sm text-gray-500">Total SaaS Revenue</p>
+          <p className="text-2xl font-bold text-green-600">{formatCurrency(data.totalSaaSRevenue)}</p>
         </div>
         <div className="card p-5">
-          <p className="text-sm text-gray-500">Monthly Revenue</p>
-          <p className="text-2xl font-bold text-blue-600">{formatCurrency(data.monthlyRevenue)}</p>
+          <p className="text-sm text-gray-500">Monthly SaaS Revenue</p>
+          <p className="text-2xl font-bold text-blue-600">{formatCurrency(data.monthlySaaSRevenue)}</p>
         </div>
         <div className="card p-5">
           <p className="text-sm text-gray-500">Active Subscriptions</p>
@@ -38,7 +38,7 @@ export default function Revenue() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card p-5">
           <h3 className="font-semibold mb-4 flex items-center gap-2"><TrendingUp size={18} /> Plan-wise Revenue</h3>
           {data.planWiseRevenue?.length > 0 ? (
@@ -57,36 +57,16 @@ export default function Revenue() {
             <p className="text-gray-500 text-sm">No revenue data</p>
           )}
         </div>
-      </div>
 
-      <div className="card overflow-x-auto">
-        <h3 className="font-semibold mb-4 flex items-center gap-2"><DollarSign size={18} /> Recent Payments</h3>
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="text-left p-3">Gym</th>
-              <th className="text-left p-3">Amount</th>
-              <th className="text-left p-3">Date</th>
-              <th className="text-left p-3">Method</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.recentPayments?.length > 0 ? (
-              data.recentPayments.map((p) => (
-                <tr key={p._id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{p.gymId?.name || '-'}</td>
-                  <td className="p-3 font-semibold">{formatCurrency(p.paidAmount)}</td>
-                  <td className="p-3">{formatDate(p.paymentDate)}</td>
-                  <td className="p-3 capitalize">{p.paymentMethod}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className="p-3 text-center text-gray-500">No payments found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <div className="card p-5">
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><DollarSign size={18} /> Revenue Information</h3>
+          <div className="space-y-3 text-sm text-gray-600">
+            <p>• Revenue is calculated from active SaaS subscriptions</p>
+            <p>• Based on platform plan prices (not gym member fees)</p>
+            <p>• Monthly revenue includes subscriptions started this month</p>
+            <p>• Total revenue includes all active subscriptions</p>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );

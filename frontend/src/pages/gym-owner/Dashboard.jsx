@@ -63,6 +63,12 @@ export default function OwnerDashboard() {
         <StatCard title="Monthly Profit" value={formatCurrency(data.monthlyProfit)} icon={TrendingUp} color="purple" />
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <StatCard title="Expiring Today" value={data.expiringToday || 0} icon={AlertTriangle} color="red" />
+        <StatCard title="Expiring This Week" value={data.expiringThisWeek || 0} icon={Clock} color="yellow" />
+        <StatCard title="Expired Members" value={data.expiredMembers || 0} icon={UserX} color="gray" />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card p-5">
           <h3 className="font-semibold mb-3 flex items-center gap-2"><AlertTriangle size={18} className="text-yellow-500" /> Due Payments</h3>

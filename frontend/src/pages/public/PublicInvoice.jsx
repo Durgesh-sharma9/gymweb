@@ -28,11 +28,12 @@ export default function PublicInvoice() {
         </div>
 
         <div className="text-center mb-4">
-          <h2 className="text-lg font-semibold">INVOICE</h2>
+          <h2 className="text-lg font-semibold">RECEIPT</h2>
           <p className="text-sm text-gray-500">{invoice.invoiceNumber} · {formatDate(invoice.createdAt)}</p>
         </div>
 
         <div className="border-t border-b py-4 mb-4 space-y-1 text-sm">
+          <p><strong>Member ID:</strong> {memberSnapshot.memberId || '-'}</p>
           <p><strong>Member:</strong> {memberSnapshot.fullName}</p>
           <p><strong>Mobile:</strong> {memberSnapshot.mobile}</p>
           <p><strong>Plan:</strong> {membershipSnapshot.planName}</p>
@@ -40,10 +41,10 @@ export default function PublicInvoice() {
         </div>
 
         <div className="space-y-1 text-sm mb-4">
-          <div className="flex justify-between"><span>Base Amount</span><span>{formatCurrency(lineItems.baseAmount)}</span></div>
+          <div className="flex justify-between"><span>Plan Amount</span><span>{formatCurrency(lineItems.baseAmount)}</span></div>
           {lineItems.discount > 0 && <div className="flex justify-between"><span>Discount</span><span>-{formatCurrency(lineItems.discount)}</span></div>}
           {lineItems.tax > 0 && <div className="flex justify-between"><span>Tax</span><span>{formatCurrency(lineItems.tax)}</span></div>}
-          <div className="flex justify-between font-bold text-base border-t pt-2"><span>Total</span><span>{formatCurrency(lineItems.finalAmount)}</span></div>
+          <div className="flex justify-between font-bold text-base border-t pt-2"><span>Final Amount</span><span>{formatCurrency(lineItems.finalAmount)}</span></div>
           <div className="flex justify-between"><span>Paid</span><span>{formatCurrency(lineItems.paidAmount)}</span></div>
           {lineItems.dueAmount > 0 && <div className="flex justify-between text-red-600"><span>Due</span><span>{formatCurrency(lineItems.dueAmount)}</span></div>}
         </div>
@@ -56,9 +57,14 @@ export default function PublicInvoice() {
           </div>
         )}
 
-        <a href={`/api/v1/public/invoices/${token}/pdf`} className="btn-primary w-full mt-6 block text-center" download>
-          Download PDF
-        </a>
+        <div className="flex gap-2 mt-6">
+          <a href={`/api/v1/public/invoices/${token}/pdf`} className="btn-primary flex-1 block text-center" download>
+            Download PDF
+          </a>
+          <button onClick={() => window.print()} className="btn-secondary flex-1">
+            Print
+          </button>
+        </div>
       </div>
     </div>
   );

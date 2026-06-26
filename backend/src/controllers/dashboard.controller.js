@@ -13,11 +13,14 @@ export const getOwnerDashboard = catchAsync(async (req, res) => {
   const gymId = req.gymId;
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const today = new Date(now.setHours(0, 0, 0, 0));
+  const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
   const [
     totalMembers, activeMembers, expiredMembers, inactiveMembers, totalTrainers,
     monthlyPayments, totalPayments, monthlyExpenses, totalExpenses,
     upcomingRenewals, membersWithDues, pendingRegistrations,
+    expiringToday, expiringThisWeek,
   ] = await Promise.all([
     Member.countDocuments({ gymId }),
     Member.countDocuments({ gymId, status: MEMBER_STATUS.ACTIVE }),
@@ -46,6 +49,8 @@ export const getOwnerDashboard = catchAsync(async (req, res) => {
       { $group: { _id: null, totalDue: { $sum: '$dueAmount' }, count: { $sum: 1 } } },
     ]),
     RegistrationRequest.countDocuments({ gymId, status: STATUS.PENDING }),
+    Membership.countDocuments({ gymId, status: MEMBER_STATUS.ACTIVE, endDate: today }),
+    Membership.countDocuments({ gymId, status: MEMBER_STATUS.ACTIVE, endDate: { $gte: today, $lte: weekEnd } }),
   ]);
 
   const monthlyRevenue = monthlyPayments[0]?.total || 0;
@@ -64,5 +69,7 @@ export const getOwnerDashboard = catchAsync(async (req, res) => {
     membersWithDuesCount: membersWithDues[0]?.count || 0,
     pendingRegistrations,
     expiryReminders: await getExpiryReminders(gymId),
+    expiringToday,
+    expiringThisWeek,
   }));
 });
