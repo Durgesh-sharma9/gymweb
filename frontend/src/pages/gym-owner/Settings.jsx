@@ -86,16 +86,116 @@ export default function Settings() {
       )}
 
       {tab === 'receipt' && (
-        <div className="card p-5 max-w-lg space-y-4">
-          <div><label className="label">Default Template</label>
-            <select className="input" value={settings.defaultReceiptTemplate} onChange={(e) => setSettings({ ...settings, defaultReceiptTemplate: e.target.value })}>
-              <option value="professional_white">Professional White</option>
-              <option value="modern_dark">Modern Dark</option>
-              <option value="premium">Premium</option>
-            </select>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="card p-5 space-y-4">
+              <h2 className="text-lg font-semibold">Select Template</h2>
+              <div className="space-y-4">
+                {[
+                  { id: 'professional_white', name: 'Professional White', description: 'Clean white professional receipt', color: 'bg-white border-gray-200' },
+                  { id: 'modern_blue', name: 'Modern Blue', description: 'Dark premium receipt with blue accents', color: 'bg-blue-50 border-blue-200' },
+                  { id: 'premium_gold', name: 'Premium Gold', description: 'Luxury gold themed receipt', color: 'bg-yellow-50 border-yellow-200' },
+                ].map((template) => (
+                  <div
+                    key={template.id}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${settings.defaultReceiptTemplate === template.id ? 'border-primary-600 ring-2 ring-primary-200' : 'border-gray-200 hover:border-gray-300'} ${template.color}`}
+                    onClick={() => setSettings({ ...settings, defaultReceiptTemplate: template.id })}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                        <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+                      </div>
+                      {settings.defaultReceiptTemplate === template.id && (
+                        <div className="w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="pt-4 border-t">
+                <label className="label">Invoice Prefix</label>
+                <input className="input" value={settings.invoicePrefix} onChange={(e) => setSettings({ ...settings, invoicePrefix: e.target.value })} />
+              </div>
+              <button onClick={saveReceipt} className="btn-primary w-full">Save Receipt Settings</button>
+            </div>
+
+            <div className="card p-5">
+              <h2 className="text-lg font-semibold mb-4">Live Preview</h2>
+              <div className="bg-gray-50 rounded-lg p-4 min-h-[400px]">
+                {settings.defaultReceiptTemplate === 'professional_white' && (
+                  <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                    <div className="text-center mb-4">
+                      <div className="font-bold text-xl text-gray-900">{gym?.name || 'Gym Name'}</div>
+                      <div className="text-sm text-gray-600">{gym?.address || 'Gym Address'}</div>
+                      <div className="text-sm text-gray-600">{gym?.mobile || 'Phone'}</div>
+                    </div>
+                    <div className="text-center border-b pb-4 mb-4">
+                      <div className="font-semibold text-lg">RECEIPT</div>
+                      <div className="text-sm text-gray-600">REC000001</div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between"><span>Member ID:</span><span>GYM0001</span></div>
+                      <div className="flex justify-between"><span>Member:</span><span>John Doe</span></div>
+                      <div className="flex justify-between"><span>Plan:</span><span>Monthly Plan</span></div>
+                      <div className="flex justify-between"><span>Plan Amount:</span><span>₹1,500</span></div>
+                      <div className="flex justify-between"><span>Discount:</span><span>-₹200</span></div>
+                      <div className="flex justify-between font-semibold border-t pt-2"><span>Final Amount:</span><span>₹1,300</span></div>
+                      <div className="flex justify-between"><span>Paid:</span><span>₹1,300</span></div>
+                    </div>
+                  </div>
+                )}
+                {settings.defaultReceiptTemplate === 'modern_blue' && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 shadow-sm">
+                    <div className="text-center mb-4">
+                      <div className="font-bold text-xl text-blue-900">{gym?.name || 'Gym Name'}</div>
+                      <div className="text-sm text-gray-600">{gym?.address || 'Gym Address'}</div>
+                      <div className="text-sm text-gray-600">{gym?.mobile || 'Phone'}</div>
+                    </div>
+                    <div className="text-center border-b border-blue-200 pb-4 mb-4">
+                      <div className="font-semibold text-lg text-blue-900">RECEIPT</div>
+                      <div className="text-sm text-gray-600">REC000001</div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between"><span>Member ID:</span><span>GYM0001</span></div>
+                      <div className="flex justify-between"><span>Member:</span><span>John Doe</span></div>
+                      <div className="flex justify-between"><span>Plan:</span><span>Monthly Plan</span></div>
+                      <div className="flex justify-between"><span>Plan Amount:</span><span>₹1,500</span></div>
+                      <div className="flex justify-between"><span>Discount:</span><span>-₹200</span></div>
+                      <div className="flex justify-between font-semibold border-t border-blue-200 pt-2 text-blue-900"><span>Final Amount:</span><span>₹1,300</span></div>
+                      <div className="flex justify-between"><span>Paid:</span><span>₹1,300</span></div>
+                    </div>
+                  </div>
+                )}
+                {settings.defaultReceiptTemplate === 'premium_gold' && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 shadow-sm">
+                    <div className="text-center mb-4">
+                      <div className="font-bold text-xl text-yellow-800">{gym?.name || 'Gym Name'}</div>
+                      <div className="text-sm text-gray-600">{gym?.address || 'Gym Address'}</div>
+                      <div className="text-sm text-gray-600">{gym?.mobile || 'Phone'}</div>
+                    </div>
+                    <div className="text-center border-b border-yellow-200 pb-4 mb-4">
+                      <div className="font-semibold text-lg text-yellow-800">RECEIPT</div>
+                      <div className="text-sm text-gray-600">REC000001</div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between"><span>Member ID:</span><span>GYM0001</span></div>
+                      <div className="flex justify-between"><span>Member:</span><span>John Doe</span></div>
+                      <div className="flex justify-between"><span>Plan:</span><span>Monthly Plan</span></div>
+                      <div className="flex justify-between"><span>Plan Amount:</span><span>₹1,500</span></div>
+                      <div className="flex justify-between"><span>Discount:</span><span>-₹200</span></div>
+                      <div className="flex justify-between font-semibold border-t border-yellow-200 pt-2 text-yellow-800"><span>Final Amount:</span><span>₹1,300</span></div>
+                      <div className="flex justify-between"><span>Paid:</span><span>₹1,300</span></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          <div><label className="label">Invoice Prefix</label><input className="input" value={settings.invoicePrefix} onChange={(e) => setSettings({ ...settings, invoicePrefix: e.target.value })} /></div>
-          <button onClick={saveReceipt} className="btn-primary">Save Receipt Settings</button>
         </div>
       )}
 
