@@ -2,7 +2,8 @@ import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
 import { User } from './models/User.js';
 import { PlatformPlan } from './models/PlatformPlan.js';
-import { ROLES } from './utils/constants.js';
+import { Gym } from './models/Gym.js';
+import { ROLES, STATUS, DEFAULT_TRAINER_PERMISSIONS } from './utils/constants.js';
 
 dotenv.config();
 
@@ -34,6 +35,78 @@ const seed = async () => {
     ]);
     console.log('Platform plans seeded');
   }
+
+  // Create test gym, gym owner, and trainer for testing
+  const testGym = await Gym.findOne({ name: 'Test Gym' });
+  let gymId;
+  
+  // Create gym owner first (required for gym)
+  const gymOwner = await User.findOne({ email: 'owner@testgym.com' });
+  let ownerId;
+  if (!gymOwner) {
+    const plan = await PlatformPlan.findOne({ name: 'Pro' });
+    const owner = await User.create({
+      name: 'Gym Owner',
+      email: 'owner@testgym.com',
+      password: 'Owner@123',
+      role: ROLES.GYM_OWNER,
+      hasCompletedOnboarding: true,
+    });
+    ownerId = owner._id;
+    console.log('Gym Owner created: owner@testgym.com / Owner@123');
+  } else {
+    ownerId = gymOwner._id;
+    console.log('Gym Owner already exists');
+  }
+
+  // Create gym with ownerId
+  if (!testGym) {
+    const plan = await PlatformPlan.findOne({ name: 'Pro' });
+    const gym = await Gym.create({
+      name: 'Test Gym',
+      slug: 'test-gym',
+      address: '123 Test Street',
+      city: 'Test City',
+      state: 'Test State',
+      mobile: '9876543210',
+      email: 'test@gymweb.com',
+      ownerId,
+      platformPlanId: plan?._id,
+      trialStart: new Date(),
+      trialEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      isTrial: true,
+    });
+    gymId = gym._id;
+    console.log('Test Gym created');
+  } else {
+    gymId = testGym._id;
+    console.log('Test Gym already exists');
+  }
+
+  // Update gym owner with gymId
+  await User.findByIdAndUpdate(ownerId, { gymId });
+
+  // Create trainer
+  const trainer = await User.findOne({ email: 'trainer@testgym.com' });
+  if (!trainer) {
+    await User.create({
+      name: 'Test Trainer',
+      email: 'trainer@testgym.com',
+      password: 'Trainer@123',
+      role: ROLES.TRAINER,
+      gymId,
+      permissions: DEFAULT_TRAINER_PERMISSIONS,
+    });
+    console.log('Trainer created: trainer@testgym.com / Trainer@123');
+  } else {
+    console.log('Trainer already exists');
+  }
+
+  console.log('\n=== TEST CREDENTIALS ===');
+  console.log('Super Admin: admin@gymweb.com / Admin@123');
+  console.log('Gym Owner: owner@testgym.com / Owner@123');
+  console.log('Trainer: trainer@testgym.com / Trainer@123');
+  console.log('=========================\n');
 
   process.exit(0);
 };

@@ -51,9 +51,13 @@ export const login = catchAsync(async (req, res) => {
 });
 
 export const getMe = catchAsync(async (req, res) => {
+  // Reload user from database to get fresh data
+  const user = await User.findById(req.user._id);
+  if (!user) throw new ApiError(404, 'User not found');
+
   let gym = null;
-  if (req.user.gymId) {
-    gym = await Gym.findById(req.user.gymId).select('name slug logo status trialStart trialEnd isTrial');
+  if (user.gymId) {
+    gym = await Gym.findById(user.gymId).select('name slug logo status trialStart trialEnd isTrial');
     
     if (gym && gym.isTrial && gym.trialEnd) {
       const now = new Date();
@@ -63,7 +67,7 @@ export const getMe = catchAsync(async (req, res) => {
       gym.trialDaysRemaining = Math.max(0, daysRemaining);
     }
   }
-  res.json(new ApiResponse(200, { user: sanitizeUser(req.user), gym }));
+  res.json(new ApiResponse(200, { user: sanitizeUser(user), gym }));
 });
 
 export const changePassword = catchAsync(async (req, res) => {
@@ -72,9 +76,11 @@ export const changePassword = catchAsync(async (req, res) => {
     throw new ApiError(400, 'New password must be at least 6 characters');
   }
 
+  // Reload user from database to get fresh mustChangePassword flag
   const user = await User.findById(req.user._id).select('+password');
 
-  if (!req.user.mustChangePassword) {
+  // Only require current password if not forced to change
+  if (!user.mustChangePassword) {
     if (!currentPassword) throw new ApiError(400, 'Current password required');
     const isMatch = await user.comparePassword(currentPassword);
     if (!isMatch) throw new ApiError(401, 'Current password is incorrect');

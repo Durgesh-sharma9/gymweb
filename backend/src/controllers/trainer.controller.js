@@ -1,5 +1,7 @@
 import { User } from '../models/User.js';
 import { Member } from '../models/Member.js';
+import { Membership } from '../models/Membership.js';
+import { Payment } from '../models/Payment.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { catchAsync } from '../utils/catchAsync.js';
@@ -75,9 +77,52 @@ export const updateTrainer = catchAsync(async (req, res) => {
 });
 
 export const getTrainerDashboard = catchAsync(async (req, res) => {
-  const assignedCount = await Member.countDocuments({ gymId: req.gymId, assignedTrainerId: req.user._id });
-  const activeCount = await Member.countDocuments({ gymId: req.gymId, assignedTrainerId: req.user._id, status: 'active' });
-  const expiredCount = await Member.countDocuments({ gymId: req.gymId, assignedTrainerId: req.user._id, status: 'expired' });
+  const gymId = req.gymId;
+  const trainerId = req.user._id;
+  const now = new Date();
+  const today = new Date(now.setHours(0, 0, 0, 0));
+  const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  res.json(new ApiResponse(200, { assignedCount, activeCount, expiredCount, permissions: req.user.permissions }));
+  const [
+    assignedCount, activeCount, expiredCount,
+    expiringThisWeek, recentMembers, recentRenewals, todayCollections,
+  ] = await Promise.all([
+    Member.countDocuments({ gymId, assignedTrainerId: trainerId }),
+    Member.countDocuments({ gymId, assignedTrainerId: trainerId, status: 'active' }),
+    Member.countDocuments({ gymId, assignedTrainerId: trainerId, status: 'expired' }),
+    Membership.countDocuments({
+      gymId,
+      memberId: { $in: await Member.find({ gymId, assignedTrainerId: trainerId }).distinct('_id') },
+      status: 'active',
+      endDate: { $gte: today, $lte: weekEnd },
+    }),
+    Member.find({ gymId, assignedTrainerId: trainerId })
+      .populate('currentMembershipId', 'planName endDate')
+      .sort({ createdAt: -1 })
+      .limit(5),
+    Membership.find({
+      gymId,
+      memberId: { $in: await Member.find({ gymId, assignedTrainerId: trainerId }).distinct('_id') },
+    })
+      .populate('memberId', 'fullName mobile')
+      .sort({ createdAt: -1 })
+      .limit(5),
+    req.user.permissions?.collectFees
+      ? Payment.aggregate([
+          { $match: { gymId, collectedBy: trainerId, paymentDate: { $gte: today } } },
+          { $group: { _id: null, total: { $sum: '$paidAmount' }, count: { $sum: 1 } } },
+        ])
+      : Promise.resolve([{ total: 0, count: 0 }]),
+  ]);
+
+  res.json(new ApiResponse(200, {
+    assignedCount,
+    activeCount,
+    expiredCount,
+    expiringThisWeek,
+    recentMembers,
+    recentRenewals,
+    todayCollections: todayCollections[0] || { total: 0, count: 0 },
+    permissions: req.user.permissions,
+  }));
 });

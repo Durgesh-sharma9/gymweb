@@ -6,8 +6,11 @@ import api from '../../api/axios';
 import { LoadingSpinner, StatusBadge, Modal, EmptyState } from '../../components/ui';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { formatCurrency, formatDate } from '../../utils/helpers';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Members() {
+  const { user, hasPermission } = useAuth();
+  const isTrainer = user?.role === 'trainer';
   const [members, setMembers] = useState([]);
   const [plans, setPlans] = useState([]);
   const [settings, setSettings] = useState(null);
@@ -95,13 +98,15 @@ export default function Members() {
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Members</h1>
-        <button
-          onClick={() => setModal(true)}
-          className="btn-primary"
-          disabled={limits?.memberLimitReached}
-        >
-          <Plus size={18} /> Add Member
-        </button>
+        {!isTrainer || hasPermission('addMember') ? (
+          <button
+            onClick={() => setModal(true)}
+            className="btn-primary"
+            disabled={limits?.memberLimitReached}
+          >
+            <Plus size={18} /> Add Member
+          </button>
+        ) : null}
       </div>
 
       {limits?.memberLimitReached && (
@@ -131,7 +136,11 @@ export default function Members() {
       </div>
 
       {members.length === 0 ? (
-        <EmptyState title="No members found" description="Add your first member to get started" action={<button onClick={() => setModal(true)} className="btn-primary">Add Member</button>} />
+        <EmptyState 
+          title="No members found" 
+          description="Add your first member to get started" 
+          action={!isTrainer || hasPermission('addMember') ? <button onClick={() => setModal(true)} className="btn-primary">Add Member</button> : null}
+        />
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
@@ -152,7 +161,10 @@ export default function Members() {
                   <td className="p-3"><StatusBadge status={m.status} /></td>
                   <td className="p-3">{m.currentMembershipId ? formatDate(m.currentMembershipId.endDate) : '-'}</td>
                   <td className="p-3">
-                    <Link to={`/gym/members/${m._id}`} className="text-primary-600 hover:underline">View</Link>
+                    <Link to={`/gym/members/${m._id}`} className="text-primary-600 hover:underline mr-3">View</Link>
+                    {!isTrainer || hasPermission('renewMembership') ? (
+                      <Link to={`/gym/members/${m._id}?action=renew`} className="text-primary-600 hover:underline">Renew</Link>
+                    ) : null}
                   </td>
                 </tr>
               ))}

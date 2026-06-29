@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
@@ -6,12 +6,19 @@ import { useAuth } from '../../context/AuthContext';
 import { getDashboardPath } from '../../utils/helpers';
 
 export default function ChangePassword() {
+  const { user, loading, setUser } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login');
+    }
+  }, [user, loading, navigate]);
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { user, setUser } = useAuth();
-  const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
   const forced = user?.mustChangePassword;
 
   const handleSubmit = async (e) => {
@@ -19,21 +26,25 @@ export default function ChangePassword() {
     if (newPassword !== confirmPassword) return toast.error('Passwords do not match');
     if (newPassword.length < 6) return toast.error('Password must be at least 6 characters');
 
-    setLoading(true);
+    setSubmitting(true);
     try {
       await api.post('/auth/change-password', {
-        currentPassword: forced ? undefined : currentPassword,
+        currentPassword: forced ? null : currentPassword,
         newPassword,
       });
-      const updated = { ...user, mustChangePassword: false };
-      setUser(updated);
-      localStorage.setItem('user', JSON.stringify(updated));
+      
+      // Fetch fresh user data from backend
+      const meRes = await api.get('/auth/me');
+      const updatedUser = meRes.data.user;
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
       toast.success('Password changed');
       navigate(getDashboardPath(user.role));
     } catch (err) {
       toast.error(err.message);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -58,8 +69,8 @@ export default function ChangePassword() {
             <label className="label">Confirm Password</label>
             <input type="password" className="input" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
           </div>
-          <button type="submit" disabled={loading} className="btn-primary w-full">
-            {loading ? 'Saving...' : 'Save Password'}
+          <button type="submit" disabled={submitting} className="btn-primary w-full">
+            {submitting ? 'Saving...' : 'Save Password'}
           </button>
         </form>
       </div>

@@ -22,10 +22,8 @@ const ownerLinks = [
 
 const trainerLinks = [
   { to: '/trainer/dashboard', icon: LayoutDashboard, label: 'Dashboard', perm: null },
-  { to: '/trainer/members', icon: Users, label: 'My Members', perm: 'viewAssignedMembers' },
-  { to: '/trainer/collect-fee', icon: Wallet, label: 'Collect Fee', perm: 'collectFees' },
-  { to: '/trainer/add-member', icon: UserPlus, label: 'Add Member', perm: 'addMember' },
-  { to: '/trainer/registrations', icon: Bell, label: 'Registrations', perm: 'addMember' },
+  { to: '/trainer/members', icon: Users, label: 'Members', perm: 'viewAssignedMembers' },
+  { to: '/trainer/profile', icon: UserCog, label: 'Profile', perm: null },
 ];
 
 const superAdminLinks = [

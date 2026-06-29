@@ -39,6 +39,7 @@ import ActivityLogs from './pages/gym-owner/ActivityLogs';
 import SubscriptionRequest from './pages/gym-owner/SubscriptionRequest';
 
 import TrainerDashboard from './pages/trainer/Dashboard';
+import TrainerProfile from './pages/trainer/Profile';
 
 import PublicRegister from './pages/public/Register';
 import PublicInvoice from './pages/public/PublicInvoice';
@@ -68,7 +69,7 @@ export default function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/about" element={<About />} />
       <Route path="/verify-email/:token" element={<VerifyEmail />} />
-      <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+      <Route path="/change-password" element={<ChangePassword />} />
 
       {/* Onboarding */}
       <Route path="/onboarding" element={<ProtectedRoute roles={['gym_owner']}><OnboardingWizard /></ProtectedRoute>} />
@@ -106,7 +107,7 @@ export default function App() {
       {/* Trainer */}
       <Route path="/trainer/dashboard" element={<ProtectedRoute roles={['trainer']}><TrainerDashboard /></ProtectedRoute>} />
       <Route path="/trainer/members" element={<ProtectedRoute roles={['trainer']}><Members /></ProtectedRoute>} />
-      <Route path="/trainer/registrations" element={<ProtectedRoute roles={['trainer']}><Registrations /></ProtectedRoute>} />
+      <Route path="/trainer/profile" element={<ProtectedRoute roles={['trainer']}><TrainerProfile /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

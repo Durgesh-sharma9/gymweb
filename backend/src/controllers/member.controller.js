@@ -242,7 +242,15 @@ export const renewMembership = catchAsync(async (req, res) => {
 
   const paid = paidAmount ?? pricing.finalAmount;
   const due = Math.max(0, pricing.finalAmount - paid);
-  const start = new Date();
+
+  // Determine start date: extend from current expiry if active, otherwise start from today
+  let start = new Date();
+  if (member.currentMembershipId) {
+    const currentMembership = await Membership.findById(member.currentMembershipId);
+    if (currentMembership && currentMembership.endDate > new Date()) {
+      start = new Date(currentMembership.endDate);
+    }
+  }
   const endDate = calculateEndDate(start, durationType, durationValue);
 
   const membership = await Membership.create({
