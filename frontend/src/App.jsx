@@ -37,6 +37,9 @@ import Registrations from './pages/gym-owner/Registrations';
 import Announcements from './pages/gym-owner/Announcements';
 import ActivityLogs from './pages/gym-owner/ActivityLogs';
 import SubscriptionRequest from './pages/gym-owner/SubscriptionRequest';
+import Attendance from './pages/gym-owner/Attendance';
+import Reports from './pages/gym-owner/Reports';
+import ReceiptHistory from './pages/gym-owner/ReceiptHistory';
 
 import TrainerDashboard from './pages/trainer/Dashboard';
 import TrainerProfile from './pages/trainer/Profile';
@@ -97,6 +100,9 @@ export default function App() {
       <Route path="/gym/plans" element={<ProtectedRoute roles={['gym_owner']}><Plans /></ProtectedRoute>} />
       <Route path="/gym/trainers" element={<ProtectedRoute roles={['gym_owner']}><Trainers /></ProtectedRoute>} />
       <Route path="/gym/payments" element={<ProtectedRoute roles={['gym_owner']}><Payments /></ProtectedRoute>} />
+      <Route path="/gym/receipts" element={<ProtectedRoute roles={['gym_owner']}><ReceiptHistory /></ProtectedRoute>} />
+      <Route path="/gym/attendance" element={<ProtectedRoute roles={['gym_owner', 'trainer']}><Attendance /></ProtectedRoute>} />
+      <Route path="/gym/reports" element={<ProtectedRoute roles={['gym_owner']}><Reports /></ProtectedRoute>} />
       <Route path="/gym/expenses" element={<ProtectedRoute roles={['gym_owner']}><Expenses /></ProtectedRoute>} />
       <Route path="/gym/settings" element={<ProtectedRoute roles={['gym_owner']}><Settings /></ProtectedRoute>} />
       <Route path="/gym/registrations" element={<ProtectedRoute roles={['gym_owner', 'trainer']}><Registrations /></ProtectedRoute>} />
@@ -107,6 +113,7 @@ export default function App() {
       {/* Trainer */}
       <Route path="/trainer/dashboard" element={<ProtectedRoute roles={['trainer']}><TrainerDashboard /></ProtectedRoute>} />
       <Route path="/trainer/members" element={<ProtectedRoute roles={['trainer']}><Members /></ProtectedRoute>} />
+      <Route path="/trainer/attendance" element={<ProtectedRoute roles={['trainer']}><Attendance /></ProtectedRoute>} />
       <Route path="/trainer/profile" element={<ProtectedRoute roles={['trainer']}><TrainerProfile /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />

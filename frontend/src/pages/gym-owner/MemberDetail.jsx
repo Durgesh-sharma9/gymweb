@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
 import { LoadingSpinner, StatusBadge, Modal } from '../../components/ui';
@@ -8,16 +8,29 @@ import { formatCurrency, formatDate } from '../../utils/helpers';
 
 export default function MemberDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [data, setData] = useState(null);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [renewModal, setRenewModal] = useState(searchParams.get('action') === 'renew');
+  const [editModal, setEditModal] = useState(false);
   const [renewForm, setRenewForm] = useState({ planId: '', paidAmount: '', paymentMethod: 'cash' });
+  const [editForm, setEditForm] = useState({});
 
   const load = () => {
     Promise.all([api.get(`/members/${id}`), api.get('/plans?status=active')])
-      .then(([m, p]) => { setData(m.data); setPlans(p.data); })
+      .then(([m, p]) => {
+        setData(m.data);
+        setEditForm({
+          fullName: m.data.member.fullName,
+          mobile: m.data.member.mobile,
+          gender: m.data.member.gender || 'male',
+          address: m.data.member.address || '',
+          notes: m.data.member.notes || '',
+        });
+        setPlans(p.data);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -45,6 +58,29 @@ export default function MemberDetail() {
     }
   };
 
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put(`/members/${id}`, editForm);
+      toast.success('Member updated');
+      setEditModal(false);
+      load();
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this member?')) return;
+    try {
+      await api.delete(`/members/${id}`);
+      toast.success('Member deleted');
+      navigate('/gym/members');
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   if (loading) return <DashboardLayout><LoadingSpinner /></DashboardLayout>;
   const { member, history, payments } = data;
 
@@ -55,18 +91,18 @@ export default function MemberDetail() {
           <h1 className="text-2xl font-bold">{member.fullName}</h1>
           <p className="text-gray-500">{member.mobile} · <StatusBadge status={member.status} /></p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setEditModal(true)} className="btn-secondary">Edit</button>
           {member.status !== 'inactive' && (
-            <button onClick={() => setRenewModal(true)} className="btn-primary">Renew</button>
+            <button type="button" onClick={() => setRenewModal(true)} className="btn-primary">Renew</button>
           )}
           {member.status === 'expired' && (
-            <>
-              <button onClick={() => handleStatus('inactive')} className="btn-secondary">Mark Inactive</button>
-            </>
+            <button type="button" onClick={() => handleStatus('inactive')} className="btn-secondary">Mark Inactive</button>
           )}
           {member.status === 'inactive' && (
-            <button onClick={() => handleStatus('active')} className="btn-primary">Reactivate</button>
+            <button type="button" onClick={() => handleStatus('active')} className="btn-primary">Reactivate</button>
           )}
+          <button type="button" onClick={handleDelete} className="btn-danger">Delete</button>
         </div>
       </div>
 
@@ -100,6 +136,24 @@ export default function MemberDetail() {
           )}
         </div>
       </div>
+
+      <Modal open={editModal} onClose={() => setEditModal(false)} title="Edit Member">
+        <form onSubmit={handleEdit} className="space-y-4">
+          <div><label className="label">Full Name</label><input className="input" value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} required /></div>
+          <div><label className="label">Mobile</label><input className="input" value={editForm.mobile} onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })} required /></div>
+          <div><label className="label">Gender</label>
+            <select className="input" value={editForm.gender} onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}>
+              <option value="male">Male</option><option value="female">Female</option><option value="other">Other</option>
+            </select>
+          </div>
+          <div><label className="label">Address</label><input className="input" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} /></div>
+          <div><label className="label">Notes</label><textarea className="input" rows="2" value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} /></div>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => setEditModal(false)} className="btn-secondary">Cancel</button>
+            <button type="submit" className="btn-primary">Save</button>
+          </div>
+        </form>
+      </Modal>
 
       <Modal open={renewModal} onClose={() => setRenewModal(false)} title="Renew Membership">
         <form onSubmit={handleRenew} className="space-y-4">

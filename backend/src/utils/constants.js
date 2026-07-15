@@ -47,6 +47,8 @@ export const ACTIVITY_ACTIONS = {
   MEMBERSHIP_CREATED: 'membership_created',
   MEMBERSHIP_RENEWED: 'membership_renewed',
   FEE_COLLECTED: 'fee_collected',
+  ATTENDANCE_CHECKIN: 'attendance_checkin',
+  ATTENDANCE_CHECKOUT: 'attendance_checkout',
   TRAINER_ADDED: 'trainer_added',
   TRAINER_UPDATED: 'trainer_updated',
   EXPENSE_ADDED: 'expense_added',

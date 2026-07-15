@@ -32,15 +32,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-800 p-4">
-      <div className="card w-full max-w-md p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-900 dark:to-gray-950 p-4">
+      <div className="card w-full max-w-md p-8 dark:bg-gray-900 dark:border-gray-800 shadow-2xl">
         <div className="text-center mb-8">
-          <Dumbbell className="mx-auto text-primary-600 mb-2" size={40} />
-          <h1 className="text-2xl font-bold">GymWeb</h1>
-          <p className="text-gray-500 text-sm">Gym Management Platform</p>
+          <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-primary-600 flex items-center justify-center">
+            <Dumbbell className="text-white" size={32} />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">GymWeb</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Gym Management Platform</p>
         </div>
 
-        <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
+        <div className="flex mb-6 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
           <button
             type="button"
             onClick={() => setLoginType('gym_owner')}
@@ -57,7 +59,7 @@ export default function Login() {
               loginType === 'trainer' ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-600'
             }`}
           >
-            Trainer
+            Trainer / Staff
           </button>
         </div>
 

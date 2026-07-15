@@ -18,6 +18,9 @@ import publicRoutes from './routes/public.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import demoRoutes from './routes/demo.routes.js';
 import onboardingRoutes from './routes/onboarding.routes.js';
+import attendanceRoutes from './routes/attendance.routes.js';
+import reportsRoutes from './routes/reports.routes.js';
+import invoiceRoutes from './routes/invoice.routes.js';
 
 const app = express();
 
@@ -34,6 +37,9 @@ app.use('/api/v1/gym', gymRoutes);
 app.use('/api/v1/members', memberRoutes);
 app.use('/api/v1/plans', planRoutes);
 app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/invoices', invoiceRoutes);
+app.use('/api/v1/attendance', attendanceRoutes);
+app.use('/api/v1/reports', reportsRoutes);
 app.use('/api/v1/trainers', trainerRoutes);
 app.use('/api/v1/expenses', expenseRoutes);
 app.use('/api/v1/registrations', registrationRoutes);

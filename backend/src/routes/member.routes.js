@@ -2,7 +2,7 @@ import { Router } from 'express';
 import {
   getMembers, checkMobile, getMember, createMemberWithMembership,
   updateMember, updateMemberStatus, renewMembership, assignTrainer,
-  getExpiryRemindersList, getMembersWithDues, getMembershipHistory,
+  getExpiryRemindersList, getMembersWithDues, getMembershipHistory, deleteMember,
 } from '../controllers/member.controller.js';
 import { authenticate } from '../middleware/auth.js';
 import { requireGymStaff, requireGymOwner } from '../middleware/roleGuard.js';
@@ -19,6 +19,7 @@ router.get('/check-mobile/:mobile', requirePermission('addMember', 'renewMembers
 router.get('/:id', getMember);
 router.post('/', requirePermission('addMember'), createMemberWithMembership);
 router.put('/:id', requireGymOwner, updateMember);
+router.delete('/:id', requireGymOwner, deleteMember);
 router.put('/:id/status', requireGymOwner, updateMemberStatus);
 router.post('/:id/renew', requirePermission('renewMembership'), renewMembership);
 router.put('/:id/assign-trainer', requireGymOwner, assignTrainer);

@@ -172,10 +172,16 @@ export const createMemberWithMembership = catchAsync(async (req, res) => {
 });
 
 export const updateMember = catchAsync(async (req, res) => {
+  const allowed = ['fullName', 'mobile', 'gender', 'dateOfBirth', 'address', 'photo', 'emergencyContactName', 'emergencyContactMobile', 'notes', 'fitnessGoal'];
+  const updates = {};
+  allowed.forEach((key) => {
+    if (req.body[key] !== undefined) updates[key] = req.body[key];
+  });
+
   const member = await Member.findOneAndUpdate(
     { _id: req.params.id, gymId: req.gymId },
-    req.body,
-    { new: true }
+    updates,
+    { new: true, runValidators: true }
   );
   if (!member) throw new ApiError(404, 'Member not found');
 
@@ -222,7 +228,7 @@ export const renewMembership = catchAsync(async (req, res) => {
     durationValue = customPlan.durationValue;
     planName = customPlan.name;
   } else {
-    const plan = await MembershipPlan.findOne({ _id: planId, gymId });
+    const plan = await MembershipPlan.findOne({ _id: planId, gymId: req.gymId });
     if (!plan) throw new ApiError(404, 'Plan not found');
     baseAmount = plan.amount;
     durationType = plan.durationType;
@@ -309,4 +315,23 @@ export const getMembersWithDues = catchAsync(async (req, res) => {
 export const getMembershipHistory = catchAsync(async (req, res) => {
   const history = await Membership.find({ gymId: req.gymId, memberId: req.params.memberId }).sort({ createdAt: -1 });
   res.json(new ApiResponse(200, history));
+});
+
+export const deleteMember = catchAsync(async (req, res) => {
+  const member = await Member.findOne({ _id: req.params.id, gymId: req.gymId });
+  if (!member) throw new ApiError(404, 'Member not found');
+
+  member.status = MEMBER_STATUS.INACTIVE;
+  await member.save();
+
+  if (member.currentMembershipId) {
+    await Membership.findByIdAndUpdate(member.currentMembershipId, { status: MEMBER_STATUS.INACTIVE });
+  }
+
+  await logActivity({
+    gymId: req.gymId, action: ACTIVITY_ACTIONS.MEMBER_INACTIVE, entityType: 'member',
+    entityId: member._id, description: `Member ${member.fullName} deleted`, performedBy: req.user._id,
+  });
+
+  res.json(new ApiResponse(200, null, 'Member deleted'));
 });

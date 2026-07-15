@@ -1,5 +1,12 @@
 import { Member } from '../models/Member.js';
 import { Invoice } from '../models/Invoice.js';
+import { Payment } from '../models/Payment.js';
+import { Membership } from '../models/Membership.js';
+import { Attendance } from '../models/Attendance.js';
+import { Expense } from '../models/Expense.js';
+import { Gym } from '../models/Gym.js';
+import { GymSettings } from '../models/GymSettings.js';
+import { MembershipPlan } from '../models/MembershipPlan.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { catchAsync } from '../utils/catchAsync.js';
@@ -35,4 +42,28 @@ export const previewPricing = catchAsync(async (req, res) => {
   });
 
   res.json(new ApiResponse(200, pricing));
+});
+
+export const backupGymData = catchAsync(async (req, res) => {
+  const gymId = req.gymId;
+  const [gym, settings, members, memberships, payments, invoices, attendance, expenses, plans] = await Promise.all([
+    Gym.findById(gymId).lean(),
+    GymSettings.findOne({ gymId }).lean(),
+    Member.find({ gymId }).lean(),
+    Membership.find({ gymId }).lean(),
+    Payment.find({ gymId }).lean(),
+    Invoice.find({ gymId }).lean(),
+    Attendance.find({ gymId }).lean(),
+    Expense.find({ gymId }).lean(),
+    MembershipPlan.find({ gymId }).lean(),
+  ]);
+
+  const backup = {
+    exportedAt: new Date().toISOString(),
+    gym, settings, members, memberships, payments, invoices, attendance, expenses, plans,
+  };
+
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Disposition', `attachment; filename=gym-backup-${gym?.slug || gymId}-${Date.now()}.json`);
+  res.send(JSON.stringify(backup, null, 2));
 });

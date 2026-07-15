@@ -14,7 +14,7 @@ export default function ReceiptHistory() {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     api.get(`/invoices?${params}`).then((res) => {
-      setInvoices(res.data);
+      setInvoices(res.data.invoices || []);
       setLoading(false);
     }).catch(() => setLoading(false));
   };
