@@ -15,6 +15,9 @@ export const tenantGuard = (req, res, next) => {
 
 export const injectGymId = (req, res, next) => {
   if (req.user.role !== ROLES.SUPER_ADMIN) {
+    if (!req.user.gymId) {
+      return next(new ApiError(400, 'Authenticated user has no gym assigned. Please complete gym setup or contact support.'));
+    }
     req.gymId = req.user.gymId;
   }
   next();

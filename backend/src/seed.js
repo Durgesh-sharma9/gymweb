@@ -83,8 +83,9 @@ const seed = async () => {
     console.log('Test Gym already exists');
   }
 
-  // Update gym owner with gymId
+  // Always update gym owner with gymId (in case it was missing)
   await User.findByIdAndUpdate(ownerId, { gymId });
+  console.log('Gym Owner updated with gymId');
 
   // Create trainer
   const trainer = await User.findOne({ email: 'trainer@testgym.com' });
@@ -99,7 +100,9 @@ const seed = async () => {
     });
     console.log('Trainer created: trainer@testgym.com / Trainer@123');
   } else {
-    console.log('Trainer already exists');
+    // Update trainer with gymId if missing
+    await User.findByIdAndUpdate(trainer._id, { gymId });
+    console.log('Trainer updated with gymId');
   }
 
   console.log('\n=== TEST CREDENTIALS ===');

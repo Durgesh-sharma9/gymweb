@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Megaphone, Send, Users, Clock, Pin, Bell } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
-import { LoadingSpinner, Modal, EmptyState } from '../../components/ui';
+import { LoadingSpinner, Badge, Button, Card, Modal, Input, Select, EmptyState } from '../../components/ui';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { formatDate } from '../../utils/helpers';
 
@@ -37,45 +37,129 @@ export default function Announcements() {
     }
   };
 
-  if (loading) return <DashboardLayout><LoadingSpinner /></DashboardLayout>;
+  const pinnedItems = items.filter(a => a.pinned);
+  const regularItems = items.filter(a => !a.pinned);
+
+  if (loading) return <DashboardLayout title="Announcements" description="Send announcements to keep your members informed"><LoadingSpinner /></DashboardLayout>;
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Announcements" description="Send announcements to keep your members informed">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Announcements</h1>
-        <button onClick={() => setModal(true)} className="btn-primary"><Plus size={18} /> New Announcement</button>
+        <p className="text-sm text-gray-500">{items.length} announcement{items.length !== 1 ? 's' : ''}</p>
+        <Button onClick={() => setModal(true)} icon={Send}>New Announcement</Button>
       </div>
 
       {items.length === 0 ? (
-        <EmptyState title="No announcements found" description="Send announcements to keep your members informed" action={<button onClick={() => setModal(true)} className="btn-primary">New Announcement</button>} />
+        <EmptyState
+          title="No announcements found"
+          description="Send announcements to keep your members informed"
+          action={<Button onClick={() => setModal(true)} icon={Send}>New Announcement</Button>}
+        />
       ) : (
-        <div className="space-y-4">
-          {items.map((a) => (
-            <div key={a._id} className="card p-5">
-              <div className="flex justify-between">
-                <h3 className="font-semibold">{a.title}</h3>
-                <span className="text-xs text-gray-500 capitalize">{a.targetAudience} · {formatDate(a.sentAt)}</span>
+        <div className="space-y-6">
+          {/* Pinned Announcements */}
+          {pinnedItems.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Pin size={16} className="text-[#2563EB]" />
+                <h3 className="font-semibold text-gray-900">Pinned</h3>
               </div>
-              <p className="text-sm text-gray-600 mt-2">{a.message}</p>
+              <div className="space-y-4">
+                {pinnedItems.map((a) => (
+                  <Card key={a._id} className="border-[#2563EB] bg-[#2563EB]/5">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-[#2563EB] rounded-xl">
+                        <Megaphone size={20} className="text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-gray-900">{a.title}</h3>
+                          <Badge variant="primary" size="sm">Pinned</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">{a.message}</p>
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Users size={14} />
+                            <span className="capitalize">{a.targetAudience}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock size={14} />
+                            <span>{formatDate(a.sentAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </div>
-          ))}
+          )}
+
+          {/* Regular Announcements */}
+          {regularItems.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4">Recent</h3>
+              <div className="space-y-4">
+                {regularItems.map((a) => (
+                  <Card key={a._id} className="hover:shadow-md transition-shadow">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-gray-100 rounded-xl">
+                        <Bell size={20} className="text-gray-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 mb-1">{a.title}</h3>
+                        <p className="text-sm text-gray-600 mb-3">{a.message}</p>
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Users size={14} />
+                            <span className="capitalize">{a.targetAudience}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock size={14} />
+                            <span>{formatDate(a.sentAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       <Modal open={modal} onClose={() => setModal(false)} title="New Announcement">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div><label className="label">Title</label><input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></div>
-          <div><label className="label">Message</label><textarea className="input" rows={4} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required /></div>
-          <div><label className="label">Target Audience</label>
-            <select className="input" value={form.targetAudience} onChange={(e) => setForm({ ...form, targetAudience: e.target.value })}>
-              <option value="all">All Members</option>
-              <option value="active">Active Members</option>
-              <option value="expired">Expired Members</option>
-            </select>
+          <Input
+            label="Title"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            required
+          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+            <textarea
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all duration-200"
+              rows={4}
+              value={form.message}
+              onChange={(e) => setForm({ ...form, message: e.target.value })}
+              required
+              placeholder="Enter your announcement message..."
+            />
           </div>
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setModal(false)} className="btn-secondary">Cancel</button>
-            <button type="submit" className="btn-primary">Send</button>
+          <Select
+            label="Target Audience"
+            value={form.targetAudience}
+            onChange={(e) => setForm({ ...form, targetAudience: e.target.value })}
+          >
+            <option value="all">All Members</option>
+            <option value="active">Active Members</option>
+            <option value="expired">Expired Members</option>
+          </Select>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="secondary" onClick={() => setModal(false)}>Cancel</Button>
+            <Button type="submit" icon={Send}>Send Announcement</Button>
           </div>
         </form>
       </Modal>

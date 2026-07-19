@@ -81,6 +81,11 @@ const generateMemberId = async (gymId) => {
 
 export const createMemberWithMembership = catchAsync(async (req, res) => {
   const gymId = req.gymId;
+  
+  if (!gymId) {
+    throw new ApiError(400, 'Gym ID is required. Please ensure you are assigned to a gym.');
+  }
+  
   const {
     fullName, mobile, gender, dateOfBirth, address, photo,
     emergencyContactName, emergencyContactMobile, notes,
@@ -215,7 +220,13 @@ export const updateMemberStatus = catchAsync(async (req, res) => {
 });
 
 export const renewMembership = catchAsync(async (req, res) => {
-  const member = await Member.findOne({ _id: req.params.id, gymId: req.gymId });
+  const gymId = req.gymId;
+  
+  if (!gymId) {
+    throw new ApiError(400, 'Gym ID is required. Please ensure you are assigned to a gym.');
+  }
+  
+  const member = await Member.findOne({ _id: req.params.id, gymId });
   if (!member) throw new ApiError(404, 'Member not found');
 
   const settings = await GymSettings.findOne({ gymId: req.gymId });

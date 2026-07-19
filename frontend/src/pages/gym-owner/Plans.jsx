@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Clock, DollarSign, Check, X, Zap, Crown, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
-import { LoadingSpinner, Modal, StatusBadge, EmptyState } from '../../components/ui';
+import { LoadingSpinner, Badge, Button, Card, Modal, Input, Select, EmptyState } from '../../components/ui';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { formatCurrency } from '../../utils/helpers';
 
@@ -43,50 +43,117 @@ export default function Plans() {
     load();
   };
 
-  if (loading) return <DashboardLayout><LoadingSpinner /></DashboardLayout>;
+  const getDurationText = (type, value) => {
+    const typeLabels = { days: 'Days', months: 'Months', years: 'Years' };
+    return `${value} ${typeLabels[type]}`;
+  };
+
+  if (loading) return <DashboardLayout title="Membership Plans" description="Create and manage membership plans"><LoadingSpinner /></DashboardLayout>;
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Membership Plans" description="Create and manage membership plans for your gym">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Membership Plans</h1>
-        <button onClick={() => setModal(true)} className="btn-primary"><Plus size={18} /> Add Plan</button>
+        <p className="text-sm text-gray-500">{plans.length} plan{plans.length !== 1 ? 's' : ''}</p>
+        <Button onClick={() => setModal(true)} icon={Plus}>Add Plan</Button>
       </div>
 
       {plans.length === 0 ? (
-        <EmptyState title="No plans found" description="Create your first membership plan to get started" action={<button onClick={() => setModal(true)} className="btn-primary">Add Plan</button>} />
+        <EmptyState
+          title="No plans found"
+          description="Create your first membership plan to get started"
+          action={<Button onClick={() => setModal(true)} icon={Plus}>Add Plan</Button>}
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {plans.map((p) => (
-            <div key={p._id} className="card p-5">
-              <div className="flex justify-between items-start">
-                <h3 className="font-bold">{p.name}</h3>
-                <StatusBadge status={p.status} />
+            <Card
+              key={p._id}
+              className={`relative overflow-hidden hover:shadow-lg transition-shadow ${p.status === 'active' ? 'border-[#2563EB]' : 'border-gray-200'}`}
+            >
+              {p.status === 'active' && (
+                <div className="absolute top-0 right-0 bg-[#2563EB] text-white text-xs px-3 py-1 rounded-bl-lg">
+                  Active
+                </div>
+              )}
+              
+              <div className="text-center mb-6">
+                <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${p.status === 'active' ? 'bg-[#2563EB]' : 'bg-gray-100'}`}>
+                  {p.status === 'active' ? (
+                    <Zap size={32} className="text-white" />
+                  ) : (
+                    <Clock size={32} className="text-gray-400" />
+                  )}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">{p.name}</h3>
+                <div className="mt-4">
+                  <span className="text-3xl font-bold text-gray-900">{formatCurrency(p.amount)}</span>
+                  <span className="text-gray-500">/{p.durationType}</span>
+                </div>
               </div>
-              <p className="text-2xl font-bold mt-2">{formatCurrency(p.amount)}</p>
-              <p className="text-sm text-gray-500">{p.durationValue} {p.durationType}</p>
-              <button onClick={() => toggleStatus(p._id, p.status)} className="text-sm text-primary-600 mt-3 hover:underline">
-                {p.status === 'active' ? 'Deactivate' : 'Activate'}
-              </button>
-            </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <Clock size={16} className="text-gray-400" />
+                  <span>{getDurationText(p.durationType, p.durationValue)}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <DollarSign size={16} className="text-gray-400" />
+                  <span>One-time payment</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant={p.status === 'active' ? 'secondary' : 'primary'}
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => toggleStatus(p._id, p.status)}
+                >
+                  {p.status === 'active' ? 'Deactivate' : 'Activate'}
+                </Button>
+              </div>
+            </Card>
           ))}
         </div>
       )}
 
       <Modal open={modal} onClose={() => setModal(false)} title="Create Plan">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div><label className="label">Plan Name</label><input className="input" placeholder="Monthly - 30 Days" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
+          <Input
+            label="Plan Name"
+            placeholder="Monthly - 30 Days"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="label">Duration Type</label>
-              <select className="input" value={form.durationType} onChange={(e) => setForm({ ...form, durationType: e.target.value })}>
-                <option value="days">Days</option><option value="months">Months</option><option value="years">Years</option>
-              </select>
-            </div>
-            <div><label className="label">Duration Value</label><input type="number" className="input" value={form.durationValue} onChange={(e) => setForm({ ...form, durationValue: e.target.value })} required /></div>
+            <Select
+              label="Duration Type"
+              value={form.durationType}
+              onChange={(e) => setForm({ ...form, durationType: e.target.value })}
+            >
+              <option value="days">Days</option>
+              <option value="months">Months</option>
+              <option value="years">Years</option>
+            </Select>
+            <Input
+              label="Duration Value"
+              type="number"
+              value={form.durationValue}
+              onChange={(e) => setForm({ ...form, durationValue: e.target.value })}
+              required
+            />
           </div>
-          <div><label className="label">Amount (₹)</label><input type="number" className="input" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required /></div>
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setModal(false)} className="btn-secondary">Cancel</button>
-            <button type="submit" className="btn-primary">Create</button>
+          <Input
+            label="Amount (₹)"
+            type="number"
+            value={form.amount}
+            onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            required
+          />
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="secondary" onClick={() => setModal(false)}>Cancel</Button>
+            <Button type="submit">Create Plan</Button>
           </div>
         </form>
       </Modal>
